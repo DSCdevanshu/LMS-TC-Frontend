@@ -1,0 +1,253 @@
+/* ========== Layout ========== */
+.login-layout {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ========== Brand Panel (Left) ========== */
+.brand-panel {
+  flex: 0 0 45%;
+  background: linear-gradient(150deg, #1565c0 0%, #1976d2 55%, #42a5f5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+
+  // Decorative circles
+  &::before {
+    content: '';
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    top: -120px;
+    right: -120px;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    bottom: -80px;
+    left: -60px;
+    pointer-events: none;
+  }
+}
+
+.brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  color: #fff;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2.75rem;
+
+  mat-icon {
+    font-size: 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    color: #fff;
+  }
+
+  span {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+}
+
+.brand-headline {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 1.1rem 0;
+  line-height: 1.35;
+}
+
+.brand-tagline {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.97rem;
+  line-height: 1.75;
+  margin: 0 0 2.5rem 0;
+}
+
+.brand-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.92rem;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    color: #81d4fa;
+    flex-shrink: 0;
+  }
+}
+
+/* ========== Form Panel (Right) ========== */
+.form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: 2.5rem 2rem;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.greeting {
+  margin: 0 0 0.3rem 0;
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.title {
+  margin: 0 0 0.4rem 0;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 0 0 2rem 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+/* Form Fields */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-row-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  margin: 0.2rem 0;
+
+  .forgot-link {
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.login-btn {
+  margin-top: 0.5rem;
+  height: 46px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.register-prompt {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+
+  a {
+    color: #1976d2;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 900px) {
+  .brand-panel {
+    flex: 0 0 40%;
+    padding: 2.5rem 2rem;
+  }
+
+  .brand-headline {
+    font-size: 1.6rem;
+  }
+
+  .brand-tagline,
+  .brand-features {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-layout {
+    flex-direction: column;
+  }
+
+  .brand-panel {
+    flex: 0 0 auto;
+    padding: 2rem;
+    min-height: 140px;
+    align-items: flex-start;
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+
+  .brand-content {
+    max-width: 100%;
+  }
+
+  .brand-headline,
+  .brand-tagline,
+  .brand-features {
+    display: none;
+  }
+
+  .brand-logo {
+    margin-bottom: 0;
+  }
+
+  .form-panel {
+    padding: 2rem 1.5rem;
+    align-items: flex-start;
+  }
+}

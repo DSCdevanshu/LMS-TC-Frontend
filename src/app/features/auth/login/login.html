@@ -1,0 +1,92 @@
+<div class="login-layout">
+
+  <!-- Left: Brand Panel -->
+  <aside class="brand-panel">
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        <mat-icon>school</mat-icon>
+        <span>LMS</span>
+      </div>
+
+      <h2 class="brand-headline">Manage your workforce<br />smarter, faster.</h2>
+      <p class="brand-tagline">
+        A centralised platform for employee onboarding, role management,
+        and performance tracking all in one place.
+      </p>
+
+      <ul class="brand-features">
+        <li class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Employee Lifecycle Management</span>
+        </li>
+        <li class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Role &amp; Access Control</span>
+        </li>
+        <li class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Real-time Reports &amp; Analytics</span>
+        </li>
+      </ul>
+
+    </div>
+  </aside>
+
+  <!-- Right: Form Panel -->
+  <main class="form-panel">
+    <div class="form-wrapper">
+
+      <p class="greeting">Welcome back!</p>
+      <h1 class="title">Sign in to LMS</h1>
+      <p class="subtitle">Enter your credentials to access your dashboard.</p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form" autocomplete="off">
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Username</mat-label>
+          <mat-icon matPrefix>person_outline</mat-icon>
+          <input matInput formControlName="username" autocomplete="off" />
+          @if (loginForm.get('username')?.hasError('required') && loginForm.get('username')?.touched) {
+            <mat-error>Username is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Password</mat-label>
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="new-password" />
+          <button mat-icon-button matSuffix type="button" (click)="togglePassword()"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'">
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-row-actions">
+          <mat-checkbox formControlName="rememberMe" color="primary">Remember me</mat-checkbox>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="w-full login-btn"
+          [disabled]="loginForm.invalid || isSubmitting()"
+        >
+          @if (isSubmitting()) { Signing in... } @else { Sign In }
+        </button>
+
+      </form>
+
+      <div class="register-prompt">
+        New to LMS? <a href="#">Contact your Admin</a>
+      </div>
+
+    </div>
+  </main>
+
+</div>

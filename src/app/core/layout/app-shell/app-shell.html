@@ -1,0 +1,56 @@
+<div class="shell" [class.shell-collapsed]="collapsed()">
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-top">
+      <button
+        mat-icon-button
+        type="button"
+        class="toggle-btn"
+        (click)="toggleSidebar()"
+        aria-label="Toggle navigation"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="user-card">
+        @if (profile()?.photoUrl) {
+          <img [src]="profile()!.photoUrl" class="avatar" alt="Profile photo" />
+        } @else {
+          <div class="avatar avatar-initials">{{ displayName().slice(0, 1).toUpperCase() }}</div>
+        }
+
+        @if (!collapsed()) {
+          <div class="user-copy">
+            <p class="name">{{ displayName() }}</p>
+            <p class="meta">{{ profile()?.designationTitle || 'Employee' }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <nav class="menu-wrap">
+      @for (item of menu(); track item.id) {
+        <app-sidebar-menu-item [item]="item" [collapsed]="collapsed()" [depth]="0" />
+      }
+    </nav>
+
+    <button
+      mat-stroked-button
+      type="button"
+      class="logout-btn"
+      (click)="logout()"
+    >
+      <mat-icon>logout</mat-icon>
+      @if (!collapsed()) { <span>Logout</span> }
+    </button>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <h1>Dashboard</h1>
+    </header>
+
+    <section class="content-body">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>

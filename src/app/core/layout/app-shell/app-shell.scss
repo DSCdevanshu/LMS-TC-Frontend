@@ -1,0 +1,142 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 17rem 1fr;
+  background: #f8fafc;
+}
+
+.sidebar {
+  background: #f1f5f9;
+  border-right: 1px solid #dbe2ea;
+  color: #1f2937;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.75rem;
+}
+
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toggle-btn {
+  align-self: flex-end;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1976d2;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.user-copy {
+  min-width: 0;
+
+  .name,
+  .meta {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .name {
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .meta {
+    margin-top: 0.15rem;
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+}
+
+.menu-wrap {
+  margin-top: 1rem;
+  overflow: auto;
+  flex: 1;
+}
+
+.logout-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 1.5rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #0f172a;
+  }
+}
+
+.content-body {
+  padding: 1.25rem;
+}
+
+.shell-collapsed {
+  grid-template-columns: 5rem 1fr;
+
+  .sidebar {
+    padding-inline: 0.5rem;
+  }
+
+  .toggle-btn {
+    align-self: center;
+  }
+
+  .user-card {
+    justify-content: center;
+  }
+
+  .logout-btn {
+    min-width: 0;
+    padding: 0 0.5rem;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 992px) {
+  .shell,
+  .shell-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    min-height: auto;
+  }
+}

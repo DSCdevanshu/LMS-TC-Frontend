@@ -1,0 +1,42 @@
+<div class="menu-item" [class.menu-item-collapsed]="collapsed()">
+  @if (hasChildren()) {
+    <button
+      type="button"
+      class="menu-button"
+      [style.padding-left.rem]="depth() * 0.75 + 0.75"
+      (click)="toggle()"
+      [attr.aria-expanded]="expanded()"
+    >
+      <mat-icon class="menu-icon">{{ iconName(item().icon) }}</mat-icon>
+      @if (!collapsed()) {
+        <span>{{ item().name }}</span>
+        <mat-icon class="expand-icon">{{ expanded() ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      }
+    </button>
+
+    @if (expanded()) {
+      <div class="menu-children">
+        @for (child of item().children; track child.id) {
+          <app-sidebar-menu-item
+            [item]="child"
+            [collapsed]="collapsed()"
+            [depth]="depth() + 1"
+          />
+        }
+      </div>
+    }
+  } @else {
+    <a
+      class="menu-link"
+      [routerLink]="linkFor(item().route)"
+      routerLinkActive="menu-link-active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      [style.padding-left.rem]="depth() * 0.75 + 0.75"
+    >
+      <mat-icon class="menu-icon">{{ iconName(item().icon) }}</mat-icon>
+      @if (!collapsed()) {
+        <span>{{ item().name }}</span>
+      }
+    </a>
+  }
+</div>

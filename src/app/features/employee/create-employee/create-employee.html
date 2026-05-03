@@ -1,0 +1,218 @@
+<section class="create-employee-page">
+  <header class="page-header">
+    <h1>Create Employee</h1>
+    <p>Fill employee profile, role mapping, and optional manager/reporting details.</p>
+  </header>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form" autocomplete="off">
+
+    <!-- Account Information -->
+    <div class="form-section">
+      <h3 class="section-title">Account Information</h3>
+      <div class="grid">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" autocomplete="off" />
+          <mat-error>Username is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="new-password" />
+          <button mat-icon-button matSuffix type="button" (click)="togglePassword()">
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>
+            @if (employeeForm.get('password')?.hasError('required')) { Password is required }
+            @else if (employeeForm.get('password')?.hasError('minlength')) { Minimum 8 characters }
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Employee Code</mat-label>
+          <input matInput formControlName="empCode" />
+          <mat-error>Employee code is required</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="form-section">
+      <h3 class="section-title">Personal Information</h3>
+      <div class="grid">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName" />
+          <mat-error>First name is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Middle Name</mat-label>
+          <input matInput formControlName="middleName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" />
+          <mat-error>Last name is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Father's Name</mat-label>
+          <input matInput formControlName="fathersName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Mother's Name</mat-label>
+          <input matInput formControlName="mothersName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Date of Birth</mat-label>
+          <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="DD/MM/YYYY" />
+          <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+          <mat-datepicker #dobPicker></mat-datepicker>
+          <mat-error>Date of birth is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Gender</mat-label>
+          <mat-select formControlName="gender">
+            @for (opt of genderOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Gender is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" />
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error>
+            @if (employeeForm.get('email')?.hasError('required')) { Email is required }
+            @else if (employeeForm.get('email')?.hasError('email')) { Invalid email address }
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phoneNumber" type="tel" />
+          <mat-icon matSuffix>phone</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Job Information -->
+    <div class="form-section">
+      <h3 class="section-title">Job Information</h3>
+      <div class="grid">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Hire Date</mat-label>
+          <input matInput [matDatepicker]="hirePicker" formControlName="hireDate" placeholder="DD/MM/YYYY" />
+          <mat-datepicker-toggle matIconSuffix [for]="hirePicker"></mat-datepicker-toggle>
+          <mat-datepicker #hirePicker></mat-datepicker>
+          <mat-error>Hire date is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Department</mat-label>
+          <mat-select formControlName="departmentId">
+            @for (dept of departments(); track dept.id) {
+              <mat-option [value]="dept.id">{{ dept.text }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Department is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Designation</mat-label>
+          <mat-select formControlName="designationId">
+            @for (desg of designations(); track desg.id) {
+              <mat-option [value]="desg.id">{{ desg.text }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Designation is required</mat-error>
+        </mat-form-field>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Reporting Managers</mat-label>
+            <mat-select formControlName="reportingManagerIds" multiple>
+              @for (mgr of managers(); track mgr.id) {
+                <mat-option [value]="mgr.id">{{ mgr.text }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address & Contact -->
+    <div class="form-section">
+      <h3 class="section-title">Address & Contact</h3>
+      <div class="grid">
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address" />
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial & Identification -->
+    <div class="form-section">
+      <h3 class="section-title">Financial & Identification</h3>
+      <div class="grid">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>PAN</mat-label>
+          <input matInput formControlName="pan" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Aadhaar Card</mat-label>
+          <input matInput formControlName="aadhaarCard" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Bank Account Number</mat-label>
+          <input matInput formControlName="bankAccountNumber" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Photo & Document -->
+    <div class="form-section">
+      <h3 class="section-title">Photo & Document</h3>
+      <div class="grid">
+        <div class="col-12">
+          <div class="file-upload-wrapper">
+            <label for="photo" class="file-label">Employee Photo (JPG/JPEG/PNG, max 2MB)</label>
+            <input
+              id="photo"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg"
+              (change)="onPhotoChange($event)"
+              class="file-input"
+            />
+            <div class="file-selected">{{ selectedPhotoName() }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || isSubmitting()">
+        <mat-icon>save</mat-icon>
+        @if (isSubmitting()) { Saving... } @else { Create Employee }
+      </button>
+      <button mat-stroked-button type="button" [routerLink]="['/dashboard']">
+        <mat-icon>close</mat-icon>
+        Cancel
+      </button>
+    </div>
+
+  </form>
+</section>
