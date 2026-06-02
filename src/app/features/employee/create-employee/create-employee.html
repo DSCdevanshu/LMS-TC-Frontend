@@ -118,8 +118,8 @@
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Department</mat-label>
           <mat-select formControlName="departmentId">
-            @for (dept of departments(); track dept.id) {
-              <mat-option [value]="dept.id">{{ dept.text }}</mat-option>
+            @for (dept of departments(); track dept.value) {
+              <mat-option [value]="+dept.value!">{{ dept.text }}</mat-option>
             }
           </mat-select>
           <mat-error>Department is required</mat-error>
@@ -128,8 +128,8 @@
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Designation</mat-label>
           <mat-select formControlName="designationId">
-            @for (desg of designations(); track desg.id) {
-              <mat-option [value]="desg.id">{{ desg.text }}</mat-option>
+            @for (desg of designations(); track desg.value) {
+              <mat-option [value]="+desg.value!">{{ desg.text }}</mat-option>
             }
           </mat-select>
           <mat-error>Designation is required</mat-error>
@@ -139,8 +139,8 @@
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Reporting Managers</mat-label>
             <mat-select formControlName="reportingManagerIds" multiple>
-              @for (mgr of managers(); track mgr.id) {
-                <mat-option [value]="mgr.id">{{ mgr.text }}</mat-option>
+              @for (mgr of managers(); track mgr.value) {
+                <mat-option [value]="+mgr.value!">{{ mgr.text }}</mat-option>
               }
             </mat-select>
           </mat-form-field>

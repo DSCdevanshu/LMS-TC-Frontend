@@ -1,45 +1,32 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MenuItem } from '../../../data/models/menu-item.model';
 
-// Maps PrimeNG pi icon names (sent from backend) → Material icon names
-const PI_TO_MAT: Record<string, string> = {
-  'pi-home': 'home',
-  'pi-users': 'group',
-  'pi-user': 'person',
-  'pi-cog': 'settings',
-  'pi-chart-bar': 'bar_chart',
-  'pi-chart-pie': 'pie_chart',
-  'pi-chart-line': 'show_chart',
-  'pi-file': 'description',
-  'pi-folder': 'folder',
-  'pi-calendar': 'calendar_today',
-  'pi-book': 'menu_book',
-  'pi-briefcase': 'work',
-  'pi-desktop': 'computer',
-  'pi-globe': 'public',
-  'pi-list': 'list',
-  'pi-search': 'search',
-  'pi-star': 'star',
-  'pi-trash': 'delete',
-  'pi-pencil': 'edit',
-  'pi-plus': 'add',
-  'pi-check': 'check',
-  'pi-times': 'close',
-  'pi-circle': 'circle',
-  'pi-bell': 'notifications',
-  'pi-dollar': 'attach_money',
-  'pi-money-bill': 'payments',
-  'pi-id-card': 'badge',
-  'pi-building': 'business',
-  'pi-sitemap': 'account_tree',
-  'pi-th-large': 'grid_view',
-  'pi-table': 'table_chart',
-  'pi-inbox': 'inbox',
-  'pi-send': 'send',
-  'pi-lock': 'lock',
-  'pi-shield': 'security',
+
+// Maps Font Awesome icon names (sent from backend) → Material icon names
+const FA_TO_MAT: Record<string, string> = {
+  'fa-home': 'home',
+  'fa-tachometer-alt': 'dashboard',
+  'fa-user': 'person',
+  'fa-address-book': 'contacts',
+  'fa-users': 'group',
+  'fa-list': 'list',
+  'fa-user-plus': 'person_add',
+  'fa-tags': 'label',
+  'fa-calendar-alt': 'event',
+  'fa-plus-circle': 'add_circle',
+  'fa-user-clock': 'schedule',
+  'fa-users-cog': 'manage_accounts',
+  'fa-globe': 'public',
+  'fa-balance-scale': 'balance',
+  'fa-database': 'storage',
+  'fa-building': 'business',
+  'fa-id-badge': 'badge',
+  'fa-map-marker-alt': 'location_on',
+  'fa-calendar-day': 'today',
+  'fa-cogs': 'settings',
+  'fa-user-shield': 'admin_panel_settings',
+  'fa-key': 'vpn_key',
 };
 
 @Component({
@@ -50,12 +37,12 @@ const PI_TO_MAT: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SidebarMenuItemComponent {
-  readonly item = input.required<MenuItem>();
+  readonly item = input.required<any>();
   readonly collapsed = input(false);
   readonly depth = input(0);
 
   readonly expanded = signal(false);
-  readonly hasChildren = computed(() => this.item().children.length > 0);
+  readonly hasChildren = computed(() => (this.item()?.children?.length ?? 0) > 0);
 
   toggle(): void {
     this.expanded.update((value) => !value);
@@ -69,8 +56,7 @@ export class SidebarMenuItemComponent {
 
   iconName(icon?: string | null): string {
     if (!icon?.trim()) return 'circle';
-    // Strip 'pi ' prefix: 'pi pi-home' → 'pi-home', or use as-is if already 'pi-home'
-    const key = icon.trim().replace(/^pi\s+/, '');
-    return PI_TO_MAT[key] ?? 'circle';
+    const key = icon.trim();
+    return FA_TO_MAT[key] ?? 'circle';
   }
 }

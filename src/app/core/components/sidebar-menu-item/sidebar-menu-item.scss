@@ -17,6 +17,14 @@
   border-left: 3px solid transparent;
   font-size: 0.95rem;
   cursor: pointer;
+  overflow: hidden;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
 }
 
 .menu-button:hover,

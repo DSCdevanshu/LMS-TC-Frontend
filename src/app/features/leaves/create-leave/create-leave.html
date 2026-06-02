@@ -1,0 +1,44 @@
+<div class="page">
+  <div class="page-header">
+    <h2>Apply for Leave</h2>
+    <a mat-stroked-button routerLink="/leaves/my-leaves"><mat-icon>arrow_back</mat-icon> Back</a>
+  </div>
+
+  <mat-card class="form-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Leave Type</mat-label>
+        <mat-select formControlName="leaveTypeId">
+          @for (lt of leaveTypes(); track lt.value) {
+            <mat-option [value]="+lt.value!">{{ lt.text }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="from" formControlName="startDate" />
+        <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
+        <mat-datepicker #from></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="to" formControlName="endDate" />
+        <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
+        <mat-datepicker #to></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Remarks</mat-label>
+        <textarea matInput formControlName="empRemarks" rows="3"></textarea>
+      </mat-form-field>
+
+      <div class="actions full">
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+          @if (submitting()) { Submitting... } @else { Submit Request }
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

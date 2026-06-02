@@ -1,0 +1,79 @@
+<div class="page">
+  <div class="page-header">
+    <h2>Edit Employee</h2>
+    <a mat-stroked-button [routerLink]="['/employees/manage']"><mat-icon>arrow_back</mat-icon> Back</a>
+  </div>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <mat-card class="form-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Middle Name</mat-label>
+        <input matInput formControlName="middleName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Mobile</mat-label>
+        <input matInput formControlName="mobile" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Department</mat-label>
+        <mat-select formControlName="departmentId">
+          @for (d of departments(); track d.value) {
+            <mat-option [value]="+d.value!">{{ d.text }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Designation</mat-label>
+        <mat-select formControlName="designationId">
+          @for (d of designations(); track d.value) {
+            <mat-option [value]="+d.value!">{{ d.text }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Reporting Managers</mat-label>
+        <mat-select formControlName="reportingManagerIds" multiple>
+          @for (m of managers(); track m.value) {
+            <mat-option [value]="+m.value!">{{ m.text }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>PAN</mat-label>
+        <input matInput formControlName="pan" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Aadhaar</mat-label>
+        <input matInput formControlName="aadhaarCard" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Bank Account #</mat-label>
+        <input matInput formControlName="bankAccountNumber" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Address</mat-label>
+        <textarea matInput formControlName="address" rows="2"></textarea>
+      </mat-form-field>
+
+      <div class="actions full">
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+          @if (submitting()) { Saving... } @else { Save Changes }
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

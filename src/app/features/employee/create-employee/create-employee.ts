@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { GenericDropdownDto } from '../../../data/models/employee.model';
+
 
 @Component({
   selector: 'app-create-employee',
@@ -37,9 +37,9 @@ export class CreateEmployeeComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly isSubmitting = signal(false);
   readonly hidePassword = signal(true);
-  readonly departments = signal<GenericDropdownDto[]>([]);
-  readonly designations = signal<GenericDropdownDto[]>([]);
-  readonly managers = signal<GenericDropdownDto[]>([]);
+  readonly departments = signal<any[]>([]);
+  readonly designations = signal<any[]>([]);
+  readonly managers = signal<any[]>([]);
   readonly selectedPhotoName = signal<string>('No file selected');
 
   readonly employeeForm = this.fb.group({

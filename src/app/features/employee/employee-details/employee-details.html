@@ -1,0 +1,46 @@
+<div class="page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  @if (employee(); as emp) {
+    <div class="page-header">
+      <div>
+        <h2>{{ emp.firstName }} {{ emp.middleName }} {{ emp.lastName }}</h2>
+        <p class="muted">Employee Code: {{ emp.empCode }}</p>
+      </div>
+      <a mat-flat-button color="primary" [routerLink]="['/employees', emp.userId, 'edit']">
+        <mat-icon>edit</mat-icon> Edit
+      </a>
+    </div>
+
+    <mat-card class="profile-card">
+      <div class="profile-row">
+        @if (emp.photoUrl) {
+          <img [src]="emp.photoUrl" alt="Photo" class="avatar"/>
+        } @else {
+          <div class="avatar avatar-initials">{{ (emp.firstName || 'E').charAt(0) }}</div>
+        }
+        <div class="profile-meta">
+          <p><strong>Email:</strong> {{ emp.emailID }}</p>
+          <p><strong>Mobile:</strong> {{ emp.mobile || '—' }}</p>
+          <p><strong>Status:</strong> <mat-chip>{{ emp.status }}</mat-chip></p>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="info-card">
+      <mat-card-title>Personal Info</mat-card-title>
+      <mat-card-content>
+        <div class="grid">
+          <div><label>Date of Birth</label><span>{{ emp.dateOfBirth | date:'dd/MM/yyyy' }}</span></div>
+          <div><label>Gender</label><span>{{ emp.gender }}</span></div>
+          <div><label>PAN</label><span>{{ emp.pan || '—' }}</span></div>
+          <div><label>Aadhaar</label><span>{{ emp.aadhaarCard || '—' }}</span></div>
+          <div><label>Bank A/C</label><span>{{ emp.bankAccountNumber || '—' }}</span></div>
+          <div class="full"><label>Address</label><span>{{ emp.address || '—' }}</span></div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

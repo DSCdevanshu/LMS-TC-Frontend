@@ -1,0 +1,133 @@
+<div class="profile-page">
+  @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+
+  @if (profile(); as p) {
+    <!-- Hero card -->
+    <mat-card class="hero-card">
+      <div class="hero">
+        @if (p?.photoUrl) {
+          <img [src]="p.photoUrl" alt="Profile photo" class="avatar" />
+        } @else {
+          <div class="avatar avatar-initials">{{ (p?.fullName || p?.firstName || 'U').charAt(0) }}</div>
+        }
+        <div class="hero-info">
+          <h2 class="name">{{ p?.fullName || ((p?.firstName || '') + ' ' + (p?.lastName || '')) }}</h2>
+          <p class="designation">{{ p?.designationTitle || '—' }}</p>
+          <mat-chip-set>
+            <mat-chip [class.chip-active]="p?.status === 'A'"
+                      [class.chip-inactive]="p?.status !== 'A'">
+              {{ p?.status === 'A' ? 'Active' : 'Inactive' }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Details grid -->
+    <div class="details-grid">
+      <!-- Personal Information -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>person</mat-icon>
+          <h3>Personal Information</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">First Name</span>
+            <span class="value">{{ p?.firstName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Middle Name</span>
+            <span class="value">{{ p?.middleName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Last Name</span>
+            <span class="value">{{ p?.lastName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Gender</span>
+            <span class="value">{{ p?.gender || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Date of Birth</span>
+            <span class="value">{{ p?.dateofBirth ? (p.dateofBirth | date:'dd/MM/yyyy') : '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Address</span>
+            <span class="value">{{ p?.address || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Work Information -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>work</mat-icon>
+          <h3>Work Information</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">Employee Code</span>
+            <span class="value">{{ p?.empCode || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Designation</span>
+            <span class="value">{{ p?.designationTitle || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Department</span>
+            <span class="value">{{ p?.departmentName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Reporting Manager</span>
+            <span class="value">{{ p?.managerNames || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Contact Information -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>mail</mat-icon>
+          <h3>Contact Information</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">Email</span>
+            <span class="value">{{ p?.emailID || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Mobile</span>
+            <span class="value">{{ p?.mobile || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Identity & Banking -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>account_balance</mat-icon>
+          <h3>Identity &amp; Banking</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">PAN</span>
+            <span class="value">{{ p?.pan || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Aadhaar</span>
+            <span class="value">{{ p?.aadhaarCard || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Bank Account</span>
+            <span class="value">{{ p?.bankAccountNumber || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  }
+</div>

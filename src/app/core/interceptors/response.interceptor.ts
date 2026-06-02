@@ -1,13 +1,18 @@
+import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { catchError, tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
-import { ApiResponse } from '../../data/models/api-response.model';
+import { AuthService } from '../services/auth.service';
 
 export const responseInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
   return next(req).pipe(
     tap((event) => {
       if (event instanceof HttpResponse) {
-        const body = event.body as ApiResponse<unknown>;
+        const body = event.body as any;
 
         if (body && body.status === 0) {
           console.error('API Business Error:', body.message);
@@ -16,6 +21,10 @@ export const responseInterceptor: HttpInterceptorFn = (req, next) => {
       }
     }),
     catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        authService.logout();
+        void router.navigate(['/login']);
+      }
       console.error('HTTP Error:', error.message);
       return throwError(() => error);
     })

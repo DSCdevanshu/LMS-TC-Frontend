@@ -1,0 +1,59 @@
+<div class="page">
+  <div class="page-header"><h2>User Access</h2></div>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <mat-card class="form-card">
+    <mat-form-field appearance="outline" class="user-select">
+      <mat-label>Select User</mat-label>
+      <mat-select [formControl]="userControl">
+        @for (u of users(); track u.value) {
+          <mat-option [value]="+u.value!">{{ u.text }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </mat-card>
+
+  @if (userControl.value) {
+    <mat-card class="block">
+      <mat-card-title>Roles</mat-card-title>
+      <div class="roles-grid">
+        @for (r of roles(); track r.id) {
+          <mat-checkbox
+            [checked]="isRoleSelected(r.id)"
+            (change)="toggleRole(r.id, $event.checked)">
+            {{ r.name }}
+          </mat-checkbox>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="block">
+      <mat-card-title>Custom Permissions</mat-card-title>
+      <mat-accordion multi>
+        @for (group of groupedPermissions(); track group.category) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ group.category }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="perm-grid">
+              @for (p of group.permissions; track p.id) {
+                <mat-checkbox
+                  [checked]="isPermSelected(p.id)"
+                  (change)="togglePerm(p.id, $event.checked)">
+                  {{ p.name }}
+                </mat-checkbox>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </mat-card>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+        @if (saving()) { Saving... } @else { Save Access }
+      </button>
+    </div>
+  }
+</div>

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MenuItem } from '../../../data/models/menu-item.model';
-import { UserProfile } from '../../../data/models/user-profile.model';
+
 import { LayoutService } from '../../services/layout.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
@@ -27,10 +27,13 @@ export class AppShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  private readonly activatedRoute = inject(ActivatedRoute);
+
   readonly collapsed = signal(false);
   readonly loading = signal(true);
-  readonly menu = signal<MenuItem[]>([]);
-  readonly profile = signal<UserProfile | null>(null);
+  readonly menu = signal<any[]>([]);
+  readonly profile = signal<any>(null);
+  readonly title = signal<string>('Dashboard');
 
   readonly displayName = computed(() => {
     const detail = this.profile();
@@ -39,6 +42,12 @@ export class AppShellComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadShellData();
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+      let r = this.activatedRoute;
+      while (r.firstChild) r = r.firstChild;
+      const t = r.snapshot.data['title'] as string | undefined;
+      if (t) this.title.set(t);
+    });
   }
 
   toggleSidebar(): void {

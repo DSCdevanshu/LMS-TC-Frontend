@@ -24,7 +24,7 @@ import { NotificationService } from '../../../core/services/notification.service
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Login {
+export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly notification = inject(NotificationService);

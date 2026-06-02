@@ -1,0 +1,9 @@
+.page { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.page-header h2 { margin: 0; }
+.form-card { padding: 16px; }
+.user-select { width: 100%; max-width: 480px; }
+.block { padding: 16px; }
+.roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 8px; }
+.perm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+.actions { display: flex; justify-content: flex-end; }
+@media (max-width: 768px) { .roles-grid, .perm-grid { grid-template-columns: 1fr; } }

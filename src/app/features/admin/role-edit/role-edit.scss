@@ -1,0 +1,12 @@
+.page { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; }
+.page-header h2 { margin: 0; }
+.form-card { padding: 16px; margin-bottom: 16px; }
+.role-name { width: 100%; max-width: 480px; }
+.perms-card { padding: 16px; }
+.perm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+.perm-grid mat-checkbox { display: flex; align-items: center; }
+.perm-grid small { display: block; color: #6b7280; font-weight: normal; margin-top: 2px; }
+.muted { color: #6b7280; }
+.actions { display: flex; justify-content: flex-end; padding-top: 16px; }
+@media (max-width: 768px) { .perm-grid { grid-template-columns: 1fr; } }

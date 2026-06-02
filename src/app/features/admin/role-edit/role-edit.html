@@ -1,0 +1,47 @@
+<div class="page">
+  <div class="page-header">
+    <h2>{{ form.value.roleName ? 'Edit Role' : 'New Role' }}</h2>
+    <a mat-stroked-button routerLink="/admin/roles"><mat-icon>arrow_back</mat-icon> Back</a>
+  </div>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-card class="form-card">
+      <mat-form-field appearance="outline" class="role-name">
+        <mat-label>Role Name</mat-label>
+        <input matInput formControlName="roleName" />
+      </mat-form-field>
+    </mat-card>
+
+    <mat-card class="perms-card">
+      <mat-card-title>Permissions</mat-card-title>
+      <mat-accordion multi>
+        @for (group of groupedPermissions(); track group.category) {
+          <mat-expansion-panel expanded>
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ group.category }}</mat-panel-title>
+              <mat-panel-description>{{ group.permissions.length }} permissions</mat-panel-description>
+            </mat-expansion-panel-header>
+            <div class="perm-grid">
+              @for (p of group.permissions; track p.id) {
+                <mat-checkbox
+                  [checked]="isSelected(p.id)"
+                  (change)="togglePermission(p.id, $event.checked)">
+                  <strong>{{ p.name }}</strong>
+                  @if (p.description) { <small class="muted">{{ p.description }}</small> }
+                </mat-checkbox>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </mat-card>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+        @if (submitting()) { Saving... } @else { Save Role }
+      </button>
+    </div>
+  </form>
+</div>

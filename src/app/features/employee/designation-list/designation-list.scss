@@ -1,0 +1,7 @@
+.page { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.page-header h2 { margin: 0; }
+.form-card { padding: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+.actions { display: flex; gap: 8px; padding-top: 6px; }
+.table-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
+table { width: 100%; }
