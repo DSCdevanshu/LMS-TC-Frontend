@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,21 +8,29 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { NavHistoryService } from '../../../core/services/nav-history.service';
+import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
 
 
 @Component({
   selector: 'app-create-employee',
   imports: [
     ReactiveFormsModule,
-    RouterModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatCardModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    DateInputMaskDirective
   ],
   templateUrl: './create-employee.html',
   styleUrl: './create-employee.scss',
@@ -33,6 +41,7 @@ export class CreateEmployeeComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly navHistory = inject(NavHistoryService);
 
   readonly isLoading = signal(true);
   readonly isSubmitting = signal(false);
@@ -40,6 +49,7 @@ export class CreateEmployeeComponent implements OnInit {
   readonly departments = signal<any[]>([]);
   readonly designations = signal<any[]>([]);
   readonly managers = signal<any[]>([]);
+  readonly photoPreview = signal<string | null>(null);
   readonly selectedPhotoName = signal<string>('No file selected');
 
   readonly employeeForm = this.fb.group({
@@ -55,7 +65,7 @@ export class CreateEmployeeComponent implements OnInit {
     gender: ['', Validators.required],
     address: [''],
     email: ['', [Validators.required, Validators.email]],
-    phoneNumber: [''],
+    phoneNumber: ['', Validators.minLength(10)],
     hireDate: [null as Date | null, Validators.required],
     designationId: [null as number | null, Validators.required],
     departmentId: [null as number | null, Validators.required],
@@ -76,6 +86,10 @@ export class CreateEmployeeComponent implements OnInit {
     this.loadLookups();
   }
 
+  goBack(): void {
+    this.navHistory.goBack();
+  }
+
   togglePassword(): void {
     this.hidePassword.update(v => !v);
   }
@@ -87,11 +101,26 @@ export class CreateEmployeeComponent implements OnInit {
     if (!file) {
       this.employeeForm.patchValue({ photo: null });
       this.selectedPhotoName.set('No file selected');
+      this.photoPreview.set(null);
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.notification.error('File Too Large', 'Photo must be less than 2 MB.');
       return;
     }
 
     this.employeeForm.patchValue({ photo: file });
     this.selectedPhotoName.set(file.name);
+    const reader = new FileReader();
+    reader.onload = () => this.photoPreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  clearPhoto(): void {
+    this.employeeForm.patchValue({ photo: null });
+    this.selectedPhotoName.set('No file selected');
+    this.photoPreview.set(null);
   }
 
   onSubmit(): void {

@@ -16,6 +16,7 @@ import { LeaveService } from '../../../core/services/leave.service';
 import { LookupService } from '../../../core/services/lookup.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LookupFlags } from '../../../core/services/lookup.service';
+import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
 
 @Component({
   selector: 'app-leave-list',
@@ -23,7 +24,8 @@ import { LookupFlags } from '../../../core/services/lookup.service';
     ReactiveFormsModule, RouterLink, DatePipe,
     MatTableModule, MatPaginatorModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatDatepickerModule,
-    MatButtonModule, MatIconModule, MatChipsModule, MatProgressBarModule
+    MatButtonModule, MatIconModule, MatChipsModule, MatProgressBarModule,
+    DateInputMaskDirective
   ],
   templateUrl: './leave-list.html',
   styleUrl: './leave-list.scss',

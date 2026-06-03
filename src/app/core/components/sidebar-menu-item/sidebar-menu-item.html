@@ -32,6 +32,7 @@
       routerLinkActive="menu-link-active"
       [routerLinkActiveOptions]="{ exact: false }"
       [style.padding-left.rem]="depth() * 0.75 + 0.75"
+      (click)="onMenuClick()"
     >
       <mat-icon class="menu-icon">{{ iconName(item().icon) }}</mat-icon>
       @if (!collapsed()) {

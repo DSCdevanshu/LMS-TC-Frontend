@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
@@ -12,12 +12,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RoleService } from '../../../core/services/role.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { NavHistoryService } from '../../../core/services/nav-history.service';
 
 
 @Component({
   selector: 'app-role-edit',
   imports: [
-    ReactiveFormsModule, RouterLink,
+    ReactiveFormsModule,
     MatCardModule, MatFormFieldModule, MatInputModule, MatCheckboxModule,
     MatButtonModule, MatIconModule, MatProgressBarModule, MatExpansionModule
   ],
@@ -31,6 +32,8 @@ export class RoleEditComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly service = inject(RoleService);
   private readonly notification = inject(NotificationService);
+
+  private readonly navHistory = inject(NavHistoryService);
 
   readonly loading = signal(true);
   readonly submitting = signal(false);
@@ -74,6 +77,10 @@ export class RoleEditComponent implements OnInit {
     const next = new Set(this.selected());
     if (checked) next.add(id); else next.delete(id);
     this.selected.set(next);
+  }
+
+  goBack(): void {
+    this.navHistory.goBack();
   }
 
   onSubmit(): void {

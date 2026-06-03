@@ -36,6 +36,10 @@ export class EmployeeService extends BaseService {
     return this.http.put<any>(`${this.baseUrl}/Employees/UpdateEmployeePhoto/${id}`, fd);
   }
 
+  removePhoto(id: number): Observable<any> {
+    return this.delete(`Employees/RemoveEmployeePhoto/${id}`);
+  }
+
   assignManager(payload: any): Observable<any> {
     return this.post('Hierarchy/assign-manager', payload);
   }

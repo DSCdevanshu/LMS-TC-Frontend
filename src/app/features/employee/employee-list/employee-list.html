@@ -12,12 +12,6 @@
 
   <form class="filters" [formGroup]="filterForm" (ngSubmit)="search()">
     <mat-form-field appearance="outline">
-      <mat-label>Search</mat-label>
-      <input matInput formControlName="searchText" placeholder="Name, code, email..." />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
       <mat-label>Department</mat-label>
       <mat-select formControlName="departmentId">
         <mat-option [value]="0">All Departments</mat-option>
@@ -41,9 +35,28 @@
       <mat-label>Status</mat-label>
       <mat-select formControlName="status">
         <mat-option value="">All</mat-option>
-        <mat-option value="Active">Active</mat-option>
-        <mat-option value="Inactive">Inactive</mat-option>
+        <mat-option value="A">Active</mat-option>
+        <mat-option value="I">Inactive</mat-option>
       </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Hire Date From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="hireDateFrom" />
+      <mat-datepicker-toggle matSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Hire Date To</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="hireDateTo" />
+      <mat-datepicker-toggle matSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Search</mat-label>
+      <input matInput formControlName="searchText" placeholder="Name, code, email..." />
+      <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
     <div class="filter-actions">
@@ -53,49 +66,85 @@
   </form>
 
   @if (loading()) {
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate" />
   }
 
   <div class="table-card">
     <table mat-table [dataSource]="dataSource" matSort>
       <ng-container matColumnDef="empCode">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
-        <td mat-cell *matCellDef="let row">{{ row.empCode }}</td>
-      </ng-container>
-      <ng-container matColumnDef="empName">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-        <td mat-cell *matCellDef="let row">{{ row.empName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="emailID">
-        <th mat-header-cell *matHeaderCellDef>Email</th>
-        <td mat-cell *matCellDef="let row">{{ row.emailID }}</td>
-      </ng-container>
-      <ng-container matColumnDef="departmentName">
-        <th mat-header-cell *matHeaderCellDef>Department</th>
-        <td mat-cell *matCellDef="let row">{{ row.departmentName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="designationName">
-        <th mat-header-cell *matHeaderCellDef>Designation</th>
-        <td mat-cell *matCellDef="let row">{{ row.designationName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row">
-          <mat-chip [class.chip-active]="row.status === 'Active'">{{ row.status || '—' }}</mat-chip>
+          <a class="cell-link" (click)="onView(row)">{{ row?.empCode || '—' }}</a>
         </td>
       </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
+
+      <ng-container matColumnDef="empName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
         <td mat-cell *matCellDef="let row">
-          <button mat-icon-button color="primary" (click)="onView(row)" matTooltip="View">
-            <mat-icon>visibility</mat-icon>
+          <a class="cell-link" (click)="onView(row)">{{ row?.empName || '—' }}</a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="emailID">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+        <td mat-cell *matCellDef="let row">{{ row?.emailID || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="mobile">
+        <th mat-header-cell *matHeaderCellDef>Mobile</th>
+        <td mat-cell *matCellDef="let row">{{ row?.mobile || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="departmentName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Department</th>
+        <td mat-cell *matCellDef="let row">{{ row?.departmentName || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="designationName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Designation</th>
+        <td mat-cell *matCellDef="let row">{{ row?.designationName || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="managerNames">
+        <th mat-header-cell *matHeaderCellDef>Manager</th>
+        <td mat-cell *matCellDef="let row">{{ row?.managerNames || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="hireDate">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Hire Date</th>
+        <td mat-cell *matCellDef="let row">{{ row?.hireDate ? (row.hireDate | date:'dd/MM/yyyy') : '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-chip [class.chip-active]="row?.status === 'A'"
+                    [class.chip-inactive]="row?.status !== 'A'">
+            {{ row?.status === 'A' ? 'Active' : 'Inactive' }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button [matMenuTriggerFor]="rowMenu">
+            <mat-icon>more_vert</mat-icon>
           </button>
-          <button mat-icon-button color="accent" (click)="onEdit(row)" matTooltip="Edit">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="onDelete(row)" matTooltip="Delete">
-            <mat-icon>delete</mat-icon>
-          </button>
+          <mat-menu #rowMenu="matMenu">
+            <button mat-menu-item (click)="onView(row)">
+              <mat-icon>visibility</mat-icon>
+              <span>View</span>
+            </button>
+            <button mat-menu-item (click)="onEdit(row)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="onDelete(row)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
         </td>
       </ng-container>
 
@@ -107,6 +156,6 @@
       </tr>
     </table>
 
-    <mat-paginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons />
   </div>
 </div>

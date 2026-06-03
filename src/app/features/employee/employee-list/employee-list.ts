@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -11,18 +12,24 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { LookupService } from '../../../core/services/lookup.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LookupFlags } from '../../../core/services/lookup.service';
+import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
 
 @Component({
   selector: 'app-employee-list',
   imports: [
-    ReactiveFormsModule, RouterLink,
+    DatePipe, ReactiveFormsModule, RouterLink,
     MatTableModule, MatPaginatorModule, MatSortModule,
     MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule, MatProgressBarModule, MatChipsModule
+    MatButtonModule, MatIconModule, MatProgressBarModule, MatChipsModule,
+    MatDatepickerModule, MatTooltipModule, MatMenuModule,
+    DateInputMaskDirective
   ],
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.scss',
@@ -38,14 +45,16 @@ export class EmployeeListComponent implements OnInit {
   readonly loading = signal(false);
   readonly departments = signal<any[]>([]);
   readonly designations = signal<any[]>([]);
-  readonly displayedColumns = ['empCode', 'empName', 'emailID', 'departmentName', 'designationName', 'status', 'actions'];
+  readonly displayedColumns = ['empCode', 'empName', 'emailID', 'mobile', 'departmentName', 'designationName', 'managerNames', 'hireDate', 'status', 'actions'];
   readonly dataSource = new MatTableDataSource<any>([]);
 
   readonly filterForm = this.fb.group({
     searchText: [''],
     departmentId: [0],
     designationId: [0],
-    status: ['']
+    status: [''],
+    hireDateFrom: [null as Date | null],
+    hireDateTo: [null as Date | null]
   });
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -68,7 +77,9 @@ export class EmployeeListComponent implements OnInit {
       searchText: v.searchText || null,
       departmentId: v.departmentId || 0,
       designationId: v.designationId || 0,
-      status: v.status || null
+      status: v.status || null,
+      hireDateFrom: v.hireDateFrom ?? null,
+      hireDateTo: v.hireDateTo ?? null
     }).subscribe({
       next: (res) => {
         this.dataSource.data = res.data ?? [];
@@ -82,7 +93,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   reset(): void {
-    this.filterForm.reset({ searchText: '', departmentId: 0, designationId: 0, status: '' });
+    this.filterForm.reset({ searchText: '', departmentId: 0, designationId: 0, status: '', hireDateFrom: null, hireDateTo: null });
     this.search();
   }
 

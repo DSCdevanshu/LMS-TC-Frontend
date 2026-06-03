@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,13 +12,16 @@ import { LeaveService } from '../../../core/services/leave.service';
 import { LookupService } from '../../../core/services/lookup.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LookupFlags } from '../../../core/services/lookup.service';
+import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
+import { NavHistoryService } from '../../../core/services/nav-history.service';
 
 @Component({
   selector: 'app-create-leave',
   imports: [
-    ReactiveFormsModule, RouterLink,
+    ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatDatepickerModule,
-    MatButtonModule, MatIconModule, MatCardModule
+    MatButtonModule, MatIconModule, MatCardModule,
+    DateInputMaskDirective
   ],
   templateUrl: './create-leave.html',
   styleUrl: './create-leave.scss',
@@ -30,6 +33,7 @@ export class CreateLeaveComponent implements OnInit {
   private readonly leaveService = inject(LeaveService);
   private readonly lookup = inject(LookupService);
   private readonly notification = inject(NotificationService);
+  private readonly navHistory = inject(NavHistoryService);
 
   readonly submitting = signal(false);
   readonly leaveTypes = signal<any[]>([]);
@@ -43,6 +47,10 @@ export class CreateLeaveComponent implements OnInit {
 
   ngOnInit(): void {
     this.lookup.getDropdownData(LookupFlags.LeaveTypes).subscribe(r => this.leaveTypes.set(r.data ?? []));
+  }
+
+  goBack(): void {
+    this.navHistory.goBack();
   }
 
   onSubmit(): void {

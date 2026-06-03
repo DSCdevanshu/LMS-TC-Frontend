@@ -63,3 +63,243 @@ textarea {
   }
 }
 
+// ── Global compact form fields & dropdowns ──
+.mat-mdc-form-field {
+  // Reduce overall form field height
+  .mat-mdc-text-field-wrapper {
+    padding: 0 12px !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 40px !important;
+    padding-top: 10px !important;
+    padding-bottom: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  // Compact floating label — resting position centered, floated position on border
+  .mat-mdc-floating-label {
+    font-size: 13px !important;
+    top: 20px !important;
+  }
+
+  &.mat-form-field-should-float .mat-mdc-floating-label {
+    top: 22px !important;
+  }
+
+  // Outline appearance refinement
+  &.mat-mdc-form-field-type-mat-select,
+  &.mat-mdc-form-field-type-mat-input {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #d1d5db !important;
+    }
+
+    .mdc-notched-outline__leading {
+      width: 0 !important;
+      min-width: 0 !important;
+      border-radius: 0 !important;
+      border-right: none !important;
+    }
+
+    .mdc-notched-outline__notch {
+      border-radius: 6px 0 0 6px !important;
+    }
+
+    .mdc-notched-outline__trailing {
+      border-radius: 0 6px 6px 0 !important;
+    }
+
+    &:hover .mdc-notched-outline__leading,
+    &:hover .mdc-notched-outline__notch,
+    &:hover .mdc-notched-outline__trailing {
+      border-color: #93c5fd !important;
+    }
+
+    &.mat-focused .mdc-notched-outline__leading,
+    &.mat-focused .mdc-notched-outline__notch,
+    &.mat-focused .mdc-notched-outline__trailing {
+      border-color: #3b82f6 !important;
+    }
+  }
+
+  // Smaller select trigger text
+  .mat-mdc-select-trigger {
+    font-size: 13px !important;
+  }
+
+  .mat-mdc-select-value-text {
+    font-size: 13px !important;
+    color: #1f2937 !important;
+  }
+
+  .mat-mdc-select-placeholder {
+    color: #9ca3af !important;
+    font-size: 13px !important;
+  }
+
+  // Compact input text
+  .mat-mdc-input-element {
+    font-size: 13px !important;
+  }
+
+  // Reduce subscript (hint/error) space when not needed
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+// Show subscript when there's an error
+.mat-mdc-form-field.mat-form-field-invalid {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: block;
+  }
+}
+
+// ── Dropdown panel (overlay) ──
+.mat-mdc-select-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 4px 0 !important;
+  max-height: 260px !important;
+
+  .mat-mdc-option {
+    font-size: 13px !important;
+    min-height: 36px !important;
+    padding: 0 12px !important;
+    color: #374151 !important;
+    background-color: #fff !important;
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background-color: #eff6ff !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background-color: #eef4ff !important;
+      color: #1d4ed8 !important;
+
+      .mdc-list-item__primary-text {
+        color: #1d4ed8 !important;
+      }
+    }
+
+    .mdc-list-item__primary-text {
+      font-size: 13px !important;
+      color: inherit !important;
+    }
+  }
+
+  // Checkmark styling — white tick on blue bg for contrast
+  .mat-pseudo-checkbox-checked,
+  .mat-pseudo-checkbox-indeterminate {
+    background-color: #3b82f6 !important;
+    color: #fff !important;
+
+    &::after {
+      border-color: #fff !important;
+      color: #fff !important;
+    }
+  }
+
+  .mat-pseudo-checkbox {
+    border-color: #9ca3af !important;
+  }
+}
+
+// ── Select arrow icon ──
+.mat-mdc-select-arrow-wrapper {
+  .mat-mdc-select-arrow {
+    color: #6b7280 !important;
+  }
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-select-arrow {
+  color: #3b82f6 !important;
+}
+
+// ── Datepicker calendar popup ──
+.mat-datepicker-content {
+  background-color: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid #e5e7eb !important;
+
+  .mat-calendar {
+    font-size: 13px !important;
+  }
+
+  .mat-calendar-header {
+    padding: 8px 8px 0 !important;
+  }
+
+  .mat-calendar-controls {
+    margin-top: 0 !important;
+  }
+
+  // Month/year button
+  .mat-calendar-period-button {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+  }
+
+  // Navigation arrows
+  .mat-calendar-previous-button,
+  .mat-calendar-next-button {
+    color: #6b7280 !important;
+
+    &:hover {
+      background-color: #f3f4f6 !important;
+    }
+  }
+
+  // Day cells
+  .mat-calendar-body-cell-content {
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    color: #374151 !important;
+
+    &:hover {
+      background-color: #eff6ff !important;
+    }
+  }
+
+  // Selected date
+  .mat-calendar-body-selected {
+    background-color: #3b82f6 !important;
+    color: #fff !important;
+  }
+
+  // Today indicator
+  .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+    border-color: #93c5fd !important;
+  }
+
+  // Weekday headers
+  .mat-calendar-table-header th {
+    font-size: 11px !important;
+    color: #9ca3af !important;
+    font-weight: 500 !important;
+  }
+
+  // Disabled dates
+  .mat-calendar-body-disabled > .mat-calendar-body-cell-content {
+    color: #d1d5db !important;
+  }
+}
+
+// Datepicker toggle icon
+.mat-datepicker-toggle .mat-mdc-icon-button {
+  color: #6b7280 !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 6px !important;
+
+  .mat-mdc-button-touch-target {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}

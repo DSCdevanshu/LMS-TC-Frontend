@@ -7,7 +7,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { LayoutService } from '../../services/layout.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
+import { NavHistoryService } from '../../services/nav-history.service';
 import { SidebarMenuItemComponent } from '../../components/sidebar-menu-item/sidebar-menu-item';
+import { NavBreadcrumbComponent } from '../../components/nav-breadcrumb/nav-breadcrumb';
 
 @Component({
   selector: 'app-shell',
@@ -15,7 +17,8 @@ import { SidebarMenuItemComponent } from '../../components/sidebar-menu-item/sid
     MatButtonModule,
     MatIconModule,
     RouterOutlet,
-    SidebarMenuItemComponent
+    SidebarMenuItemComponent,
+    NavBreadcrumbComponent
   ],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
@@ -25,6 +28,7 @@ export class AppShellComponent implements OnInit {
   private readonly layoutService = inject(LayoutService);
   private readonly notification = inject(NotificationService);
   private readonly authService = inject(AuthService);
+  private readonly navHistory = inject(NavHistoryService);
   private readonly router = inject(Router);
 
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -41,6 +45,7 @@ export class AppShellComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.navHistory.init();
     this.loadShellData();
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       let r = this.activatedRoute;

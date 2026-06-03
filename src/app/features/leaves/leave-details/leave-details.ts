@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -11,12 +11,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LeaveService } from '../../../core/services/leave.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { NavHistoryService } from '../../../core/services/nav-history.service';
 import { RemarksDialog } from './remarks-dialog';
 
 @Component({
   selector: 'app-leave-details',
   imports: [
-    RouterLink, DatePipe,
+    DatePipe,
     MatCardModule, MatButtonModule, MatIconModule, MatChipsModule,
     MatTableModule, MatProgressBarModule, MatDialogModule
   ],
@@ -31,6 +32,8 @@ export class LeaveDetailsComponent implements OnInit {
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
 
+  private readonly navHistory = inject(NavHistoryService);
+
   readonly loading = signal(true);
   readonly details = signal<any>(null);
   readonly actions = signal<any[]>([]);
@@ -39,6 +42,10 @@ export class LeaveDetailsComponent implements OnInit {
   readonly dayColumns = ['leaveDate', 'dayName', 'dayLeaveType'];
 
   private leaveId = 0;
+
+  goBack(): void {
+    this.navHistory.goBack();
+  }
 
   ngOnInit(): void {
     this.leaveId = Number(this.route.snapshot.paramMap.get('id'));

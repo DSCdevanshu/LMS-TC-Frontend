@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { NavHistoryService } from '../../services/nav-history.service';
 
 
 // Maps Font Awesome icon names (sent from backend) → Material icon names
@@ -37,6 +38,7 @@ const FA_TO_MAT: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SidebarMenuItemComponent {
+  private readonly navHistory = inject(NavHistoryService);
   readonly item = input.required<any>();
   readonly collapsed = input(false);
   readonly depth = input(0);
@@ -52,6 +54,10 @@ export class SidebarMenuItemComponent {
     if (!route) return '/dashboard';
     const normalized = route.trim().replace(/\s+/g, '-');
     return normalized.startsWith('/') ? normalized : `/${normalized}`;
+  }
+
+  onMenuClick(): void {
+    this.navHistory.reset();
   }
 
   iconName(icon?: string | null): string {

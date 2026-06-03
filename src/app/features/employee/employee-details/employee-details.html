@@ -1,46 +1,138 @@
-<div class="page">
-  @if (loading()) {
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-  }
+<div class="detail-page">
+  @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
 
   @if (employee(); as emp) {
-    <div class="page-header">
-      <div>
-        <h2>{{ emp.firstName }} {{ emp.middleName }} {{ emp.lastName }}</h2>
-        <p class="muted">Employee Code: {{ emp.empCode }}</p>
-      </div>
-      <a mat-flat-button color="primary" [routerLink]="['/employees', emp.userId, 'edit']">
-        <mat-icon>edit</mat-icon> Edit
-      </a>
-    </div>
-
-    <mat-card class="profile-card">
-      <div class="profile-row">
+    <!-- Hero card -->
+    <mat-card class="hero-card">
+      <div class="hero">
         @if (emp.photoUrl) {
-          <img [src]="emp.photoUrl" alt="Photo" class="avatar"/>
+          <img [src]="emp.photoUrl" alt="Photo" class="avatar" />
         } @else {
           <div class="avatar avatar-initials">{{ (emp.firstName || 'E').charAt(0) }}</div>
         }
-        <div class="profile-meta">
-          <p><strong>Email:</strong> {{ emp.emailID }}</p>
-          <p><strong>Mobile:</strong> {{ emp.mobile || '—' }}</p>
-          <p><strong>Status:</strong> <mat-chip>{{ emp.status }}</mat-chip></p>
+        <div class="hero-info">
+          <h2 class="name">{{ emp.firstName }} {{ emp.middleName }} {{ emp.lastName }}</h2>
+          <p class="subtitle">{{ emp.empCode }}</p>
+          <mat-chip-set>
+            <mat-chip [class.chip-active]="emp.status === 'A'"
+                      [class.chip-inactive]="emp.status !== 'A'">
+              {{ emp.status === 'A' ? 'Active' : 'Inactive' }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+        <div class="hero-actions">
+          <a mat-flat-button color="primary" [routerLink]="['/employees', emp.userId, 'edit']">
+            <mat-icon>edit</mat-icon> Edit
+          </a>
         </div>
       </div>
     </mat-card>
 
-    <mat-card class="info-card">
-      <mat-card-title>Personal Info</mat-card-title>
-      <mat-card-content>
-        <div class="grid">
-          <div><label>Date of Birth</label><span>{{ emp.dateOfBirth | date:'dd/MM/yyyy' }}</span></div>
-          <div><label>Gender</label><span>{{ emp.gender }}</span></div>
-          <div><label>PAN</label><span>{{ emp.pan || '—' }}</span></div>
-          <div><label>Aadhaar</label><span>{{ emp.aadhaarCard || '—' }}</span></div>
-          <div><label>Bank A/C</label><span>{{ emp.bankAccountNumber || '—' }}</span></div>
-          <div class="full"><label>Address</label><span>{{ emp.address || '—' }}</span></div>
+    <!-- Details grid -->
+    <div class="details-grid">
+      <!-- Personal Information -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>person</mat-icon>
+          <h3>Personal Information</h3>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">First Name</span>
+            <span class="value">{{ emp.firstName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Middle Name</span>
+            <span class="value">{{ emp.middleName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Last Name</span>
+            <span class="value">{{ emp.lastName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Gender</span>
+            <span class="value">{{ emp.gender || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Date of Birth</span>
+            <span class="value">{{ emp.dateOfBirth ? (emp.dateOfBirth | date:'dd/MM/yyyy') : '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Address</span>
+            <span class="value">{{ emp.address || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Work Information -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>work</mat-icon>
+          <h3>Work Information</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">Employee Code</span>
+            <span class="value">{{ emp.empCode || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Department</span>
+            <span class="value">{{ departmentName() }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Designation</span>
+            <span class="value">{{ designationName() }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Reporting Manager(s)</span>
+            <span class="value">{{ managerNames() }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Contact Information -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>mail</mat-icon>
+          <h3>Contact Information</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">Email</span>
+            <span class="value">{{ emp.emailID || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Mobile</span>
+            <span class="value">{{ emp.mobile || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Identity & Banking -->
+      <mat-card class="detail-card">
+        <div class="card-title">
+          <mat-icon>account_balance</mat-icon>
+          <h3>Identity &amp; Banking</h3>
+        </div>
+        <mat-divider />
+        <div class="field-grid">
+          <div class="field">
+            <span class="label">PAN</span>
+            <span class="value">{{ emp.pan || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Aadhaar</span>
+            <span class="value">{{ emp.aadhaarCard || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Bank Account</span>
+            <span class="value">{{ emp.bankAccountNumber || '—' }}</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
   }
 </div>

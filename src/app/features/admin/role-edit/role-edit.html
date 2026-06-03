@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page-header">
     <h2>{{ form.value.roleName ? 'Edit Role' : 'New Role' }}</h2>
-    <a mat-stroked-button routerLink="/admin/roles"><mat-icon>arrow_back</mat-icon> Back</a>
+    <button mat-stroked-button type="button" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
   </div>
 
   @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
