@@ -15,11 +15,14 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { LookupService } from '../../../core/services/lookup.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LookupFlags } from '../../../core/services/lookup.service';
 import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
+import { RowActionsComponent, RowAction } from '../../../shared/components/row-actions/row-actions';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-employee-list',
@@ -29,7 +32,7 @@ import { DateInputMaskDirective } from '../../../core/directives/date-input-mask
     MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule, MatProgressBarModule, MatChipsModule,
     MatDatepickerModule, MatTooltipModule, MatMenuModule,
-    DateInputMaskDirective
+    DateInputMaskDirective, RowActionsComponent
   ],
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.scss',
@@ -41,12 +44,18 @@ export class EmployeeListComponent implements OnInit {
   private readonly lookupService = inject(LookupService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(false);
   readonly departments = signal<any[]>([]);
   readonly designations = signal<any[]>([]);
   readonly displayedColumns = ['empCode', 'empName', 'emailID', 'mobile', 'departmentName', 'designationName', 'managerNames', 'hireDate', 'status', 'actions'];
   readonly dataSource = new MatTableDataSource<any>([]);
+  readonly empActions: RowAction[] = [
+    { key: 'view', label: 'View', icon: 'visibility', color: 'green' },
+    { key: 'edit', label: 'Edit', icon: 'edit', color: 'blue' },
+    { key: 'delete', label: 'Delete', icon: 'delete', color: 'red' }
+  ];
 
   readonly filterForm = this.fb.group({
     searchText: [''],
@@ -106,14 +115,33 @@ export class EmployeeListComponent implements OnInit {
   }
 
   onDelete(row: any): void {
-    if (!confirm(`Delete employee ${row?.empName}?`)) return;
-    this.employeeService.remove(row?.userId).subscribe({
-      next: () => {
-        this.notification.success('Deleted', `${row.empName} removed.`);
-        this.search();
-      },
-      error: () => this.notification.error('Delete Failed', 'Could not delete employee.')
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Employee',
+        message: `Are you sure you want to delete "${row?.empName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        color: 'warn'
+      }
     });
+    ref.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.employeeService.remove(row?.userId).subscribe({
+        next: () => {
+          this.notification.success('Deleted', `${row.empName} removed.`);
+          this.search();
+        },
+        error: () => this.notification.error('Delete Failed', 'Could not delete employee.')
+      });
+    });
+  }
+
+  onAction(key: string, row: any): void {
+    switch (key) {
+      case 'view': this.onView(row); break;
+      case 'edit': this.onEdit(row); break;
+      case 'delete': this.onDelete(row); break;
+    }
   }
 
   private loadLookups(): void {

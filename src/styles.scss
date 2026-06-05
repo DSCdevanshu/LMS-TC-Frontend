@@ -63,6 +63,11 @@ textarea {
   }
 }
 
+// Global table styles
+.mat-mdc-table {
+  background: #fff !important;
+}
+
 // ── Global compact form fields & dropdowns ──
 .mat-mdc-form-field {
   // Reduce overall form field height

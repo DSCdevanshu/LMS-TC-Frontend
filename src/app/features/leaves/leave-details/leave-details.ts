@@ -2,23 +2,22 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LeaveService } from '../../../core/services/leave.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { NavHistoryService } from '../../../core/services/nav-history.service';
+import { LeaveCodePipe } from '../../../core/pipes/leave-code.pipe';
 import { RemarksDialog } from './remarks-dialog';
 
 @Component({
   selector: 'app-leave-details',
   imports: [
-    DatePipe,
-    MatCardModule, MatButtonModule, MatIconModule, MatChipsModule,
+    DatePipe, LeaveCodePipe,
+    MatButtonModule, MatIconModule,
     MatTableModule, MatProgressBarModule, MatDialogModule
   ],
   templateUrl: './leave-details.html',
@@ -31,14 +30,13 @@ export class LeaveDetailsComponent implements OnInit {
   private readonly leaveService = inject(LeaveService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
-
   private readonly navHistory = inject(NavHistoryService);
 
   readonly loading = signal(true);
   readonly details = signal<any>(null);
   readonly actions = signal<any[]>([]);
   readonly history = signal<any[]>([]);
-  readonly historyColumns = ['processDate', 'status', 'processByName', 'remarks'];
+  readonly activeStep = signal(-1);
   readonly dayColumns = ['leaveDate', 'dayName', 'dayLeaveType'];
 
   private leaveId = 0;
@@ -74,8 +72,14 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   takeAction(action: any): void {
+    // Edit → navigate to apply page with editId
+    if (+action?.processId === 1) {
+      void this.router.navigate(['/leaves/apply'], { queryParams: { editId: this.leaveId } });
+      return;
+    }
+
     const ref = this.dialog.open(RemarksDialog, {
-      width: '420px',
+      width: '480px',
       data: { actionName: action?.buttonName }
     });
     ref.afterClosed().subscribe((remarks) => {
@@ -94,7 +98,11 @@ export class LeaveDetailsComponent implements OnInit {
     });
   }
 
-  edit(): void {
-    void this.router.navigate(['/leaves/new'], { queryParams: { editId: this.leaveId } });
+  statusGroup(status: string): string {
+    const s = (status ?? '').toLowerCase();
+    if (s.includes('approved')) return 'approved';
+    if (s.includes('hold')) return 'onhold';
+    if (s.includes('rejected')) return 'rejected';
+    return 'pending';
   }
 }

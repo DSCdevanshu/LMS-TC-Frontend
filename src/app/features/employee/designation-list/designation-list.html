@@ -1,43 +1,45 @@
 <div class="page">
-  <div class="page-header"><h2>Designations</h2></div>
+  <div class="page-header">
+    <div>
+      <h2>Designations</h2>
+      <p class="muted">Manage organisation designations</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon> Add Designation
+    </button>
+  </div>
 
-  <mat-card class="form-card">
-    <mat-card-title>{{ editingId() ? 'Edit' : 'Add' }} Designation</mat-card-title>
-    <form [formGroup]="form" (ngSubmit)="save()" class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Title</mat-label>
-        <input matInput formControlName="title" />
-      </mat-form-field>
-      <div class="actions">
-        <button mat-flat-button color="primary" type="submit">{{ editingId() ? 'Update' : 'Add' }}</button>
-        @if (editingId()) {
-          <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
-        }
-      </div>
-    </form>
-  </mat-card>
+  <div class="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <input matInput (input)="applyFilter()" [(ngModel)]="filterTitle" placeholder="Filter by title..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
 
   @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
 
   <div class="table-card">
-    <table mat-table [dataSource]="dataSource">
-      <ng-container matColumnDef="designationId">
-        <th mat-header-cell *matHeaderCellDef>ID</th>
-        <td mat-cell *matCellDef="let row">{{ row.designationId }}</td>
-      </ng-container>
+    <table mat-table [dataSource]="dataSource" matSort>
       <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
         <td mat-cell *matCellDef="let row">{{ row.title }}</td>
       </ng-container>
+      <ng-container matColumnDef="totalEmployees">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Employees</th>
+        <td mat-cell *matCellDef="let row">{{ row.totalEmployees ?? 0 }}</td>
+      </ng-container>
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
-          <button mat-icon-button color="primary" (click)="edit(row)"><mat-icon>edit</mat-icon></button>
-          <button mat-icon-button color="warn" (click)="remove(row)"><mat-icon>delete</mat-icon></button>
+          <app-row-actions [actions]="rowActions" (actionClick)="onAction($event, row)"></app-row-actions>
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      @if (dataSource.filteredData.length === 0) {
+        <tr class="empty"><td [attr.colspan]="displayedColumns.length">No designations found</td></tr>
+      }
     </table>
   </div>
 </div>

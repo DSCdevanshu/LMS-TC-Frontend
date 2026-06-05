@@ -32,4 +32,16 @@ export class AuthService {
       return false;
     }
   }
+
+  getUserId(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const id = payload.nameid ?? payload.sub ?? payload.UserId;
+      return id ? +id : null;
+    } catch {
+      return null;
+    }
+  }
 }

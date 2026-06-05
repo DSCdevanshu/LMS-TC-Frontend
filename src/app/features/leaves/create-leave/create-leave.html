@@ -1,44 +1,163 @@
 <div class="page">
   <div class="page-header">
-    <h2>Apply for Leave</h2>
-    <button mat-stroked-button type="button" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
+    <div>
+      <h2>{{ editId() ? 'Edit Leave Request ' + (editId() | leaveCode) : 'Apply for Leave' }}</h2>
+      <p class="muted">{{ editId() ? 'Modify your leave request' : 'Create a new leave request' }}</p>
+    </div>
   </div>
 
-  <mat-card class="form-card">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Leave Type</mat-label>
-        <mat-select formControlName="leaveTypeId">
-          @for (lt of leaveTypes(); track lt.value) {
-            <mat-option [value]="+lt.value!">{{ lt.text }}</mat-option>
+  <div class="layout">
+    <!-- LEFT: Leave Form -->
+    <mat-card class="form-card">
+      <mat-card-title>Leave Request</mat-card-title>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        @if (canCreateForOthers()) {
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Employee</mat-label>
+            <mat-select formControlName="userId">
+              @for (emp of employees(); track emp.value) {
+                <mat-option [value]="+emp.value!">{{ emp.text }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Leave Type</mat-label>
+            <mat-select formControlName="leaveTypeId">
+              @for (lt of leaveTypes(); track lt.value) {
+                <mat-option [value]="+lt.value!">{{ lt.text }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="from" formControlName="startDate" [max]="form.value.endDate" />
+            <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
+            <mat-datepicker #from></mat-datepicker>
+            @if (form.controls.startDate.hasError('matDatepickerMax')) {
+              <mat-error>Start date cannot be after end date</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="to" formControlName="endDate" [min]="form.value.startDate" />
+            <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
+            <mat-datepicker #to></mat-datepicker>
+            @if (form.controls.endDate.hasError('matDatepickerMin')) {
+              <mat-error>End date cannot be before start date</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (dayCount() > 0) {
+          <div class="day-count" [class.error]="form.hasError('maxRange')">
+            <span>Total days: <strong>{{ dayCount() }}</strong></span>
+            @if (form.hasError('maxRange')) {
+              <span class="range-error">Leave duration cannot exceed 30 days</span>
+            }
+          </div>
+        }
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Remarks</mat-label>
+          <textarea matInput formControlName="empRemarks" placeholder="Reason for leave (optional)"></textarea>
+        </mat-form-field>
+
+        <div class="actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+            @if (submitting()) { Saving... } @else { <ng-container><mat-icon>save</mat-icon> Save as Draft</ng-container> }
+          </button>
+        </div>
+      </form>
+    </mat-card>
+
+    <!-- RIGHT: Calendar + Balance -->
+    <div class="right-panel">
+      <!-- Calendar -->
+      <mat-card class="calendar-card">
+        <div class="calendar-header">
+          <mat-form-field appearance="outline" class="cal-select">
+            <mat-select [value]="calendarMonth()" (selectionChange)="calendarMonth.set($event.value); onCalendarChange()">
+              @for (m of months; track m.value) {
+                <mat-option [value]="m.value">{{ m.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="cal-select">
+            <mat-select [value]="calendarYear()" (selectionChange)="calendarYear.set($event.value); onCalendarChange()">
+              @for (y of years; track y) {
+                <mat-option [value]="y">{{ y }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button class="reset-btn" (click)="resetCalendar()" title="Reset to current month">
+            <mat-icon>today</mat-icon>
+          </button>
+        </div>
+
+        <div class="calendar-grid">
+          @for (wd of weekDays; track wd) {
+            <div class="cal-weekday">{{ wd }}</div>
           }
-        </mat-select>
-      </mat-form-field>
+          @for (cell of calendarDays(); track $index) {
+            @if (cell.day) {
+              <div class="cal-day"
+                [class.today]="cell.isToday"
+                [class.sunday]="cell.isSunday"
+                [class.has-event]="cell.event"
+                [class.cal-approved]="cell.event?.group === 'approved'"
+                [class.cal-pending]="cell.event?.group === 'pending'"
+                [class.cal-onhold]="cell.event?.group === 'onhold'"
+                [class.cal-holiday]="cell.event?.group === 'holiday'"
+                [attr.title]="cell.event ? (cell.event.title + ' — ' + cell.event.status) : null">
+                {{ cell.day }}
+              </div>
+            } @else {
+              <div class="cal-day empty"></div>
+            }
+          }
+        </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="from" formControlName="startDate" />
-        <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
-        <mat-datepicker #from></mat-datepicker>
-      </mat-form-field>
+        <div class="calendar-legend">
+          <span class="legend-item"><span class="dot approved"></span> Approved</span>
+          <span class="legend-item"><span class="dot pending"></span> Draft / Requested</span>
+          <span class="legend-item"><span class="dot onhold"></span> On Hold</span>
+          <span class="legend-item"><span class="dot holiday"></span> Holiday</span>
+        </div>
+      </mat-card>
 
-      <mat-form-field appearance="outline">
-        <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="to" formControlName="endDate" />
-        <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
-        <mat-datepicker #to></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full">
-        <mat-label>Remarks</mat-label>
-        <textarea matInput formControlName="empRemarks" rows="3"></textarea>
-      </mat-form-field>
-
-      <div class="actions full">
-        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
-          @if (submitting()) { Submitting... } @else { Submit Request }
-        </button>
-      </div>
-    </form>
-  </mat-card>
+      <!-- Leave Balance -->
+      @if (balance(); as bal) {
+        <div class="balance-row">
+          <div class="balance-card paid">
+            <mat-icon>work_off</mat-icon>
+            <div class="bal-info">
+              <span class="bal-value">{{ bal.paidLeave ?? 0 }}</span>
+              <span class="bal-label">Paid Leave</span>
+            </div>
+          </div>
+          <div class="balance-card free">
+            <mat-icon>free_cancellation</mat-icon>
+            <div class="bal-info">
+              <span class="bal-value">{{ bal.freeLeave ?? 0 }}</span>
+              <span class="bal-label">Free Leave</span>
+            </div>
+          </div>
+          <div class="balance-card short">
+            <mat-icon>schedule</mat-icon>
+            <div class="bal-info">
+              <span class="bal-value">{{ bal.shortLeave ?? 0 }}</span>
+              <span class="bal-label">Short Leave</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
 </div>

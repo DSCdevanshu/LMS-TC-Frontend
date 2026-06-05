@@ -60,7 +60,7 @@ export class EmployeeService extends BaseService {
       if (val === undefined || val === null) return;
       if (Array.isArray(val)) {
         val.forEach((item) => fd.append(key, item instanceof File ? item : String(item)));
-      } else if (val instanceof File) {
+      } else if (val instanceof File) {4
         fd.append(key, val);
       } else {
         fd.append(key, String(val));

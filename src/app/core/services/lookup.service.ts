@@ -10,7 +10,11 @@ export const LookupFlags = {
   Managers: 'GetAllEmployeesDropDown',
   LeaveTypes: 'GetLeaveTypeDropdown',
   LeaveProcess: 'GetLeaveProcessDropdown',
-  Roles: 'GetRolesDropdown'
+  Roles: 'GetRolesDropdown',
+  AuthorizedEmployees: 'GetAuthorizedEmployeesDropDown',
+  AuthorizedDepartments: 'GetAuthorizedDepartmentsDropDown',
+  LeaveTypeDropDown: 'GetLeaveTypeDropDown',
+  LeaveProcessDropDown: 'GetLeaveProcessDropDown'
 } as const;
 
 @Injectable({ providedIn: 'root' })

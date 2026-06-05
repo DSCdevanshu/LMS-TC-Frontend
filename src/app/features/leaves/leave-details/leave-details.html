@@ -1,83 +1,129 @@
 <div class="page">
   <div class="page-header">
-    <h2>Leave Request #{{ details()?.header?.leaveReqID || '' }}</h2>
+    <div>
+      <h2>Leave Request {{ details()?.header?.leaveReqID | leaveCode }}</h2>
+      <p class="muted">View and manage leave request</p>
+    </div>
     <button mat-stroked-button type="button" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
   </div>
 
   @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
 
   @if (details()?.header; as h) {
-    <mat-card class="header-card">
+    <!-- Process Timeline -->
+    @if (history().length) {
+      <div class="detail-card">
+        <h4 class="section-title">Process History</h4>
+        <div class="timeline">
+          @for (step of history(); track $index; let last = $last) {
+            <div class="timeline-step" [class.active]="last"
+                 (mouseenter)="activeStep.set($index)" (mouseleave)="activeStep.set(-1)">
+              <div class="step-dot" [style.background]="step.colorTheme || '#3b82f6'">
+                <span class="dot-letter">{{ (step.status || '?').charAt(0) }}</span>
+              </div>
+              @if (!last) { <div class="step-line"></div> }
+              <div class="step-label">{{ step.status }}</div>
+
+              @if (activeStep() === $index) {
+                <div class="step-popover">
+                  <div class="pop-row"><strong>Status:</strong> {{ step.status }}</div>
+                  <div class="pop-row"><strong>Date:</strong> {{ step.processDate | date:'dd MMM yyyy HH:mm' }}</div>
+                  <div class="pop-row"><strong>By:</strong> {{ step.processByName }} ({{ step.processByCode }})</div>
+                  @if (step.remarks) {
+                    <div class="pop-row"><strong>Remarks:</strong> {{ step.remarks }}</div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Employee & Leave Info -->
+    <div class="detail-card">
       <div class="header-row">
         @if (h.photoUrl) { <img [src]="h.photoUrl" class="avatar"/> }
         @else { <div class="avatar avatar-initials">{{ (h.employeeName || 'E').charAt(0) }}</div> }
         <div class="header-meta">
           <h3>{{ h.employeeName }} <small>({{ h.empCode }})</small></h3>
           <p class="muted">{{ h.designation }} · {{ h.departmentName }}</p>
-          <p>
-            <strong>{{ h.leaveType }}</strong> · {{ h.startDate | date:'dd/MM/yyyy' }} → {{ h.endDate | date:'dd/MM/yyyy' }}
-          </p>
-          <mat-chip>{{ h.currentStatus }}</mat-chip>
+        </div>
+        <div class="status-chip" [class]="'chip-' + statusGroup(h.currentStatus)">{{ h.currentStatus }}</div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Leave Type</span>
+          <span class="info-value">{{ h.leaveType }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Start Date</span>
+          <span class="info-value">{{ h.startDate | date:'dd MMM yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">End Date</span>
+          <span class="info-value">{{ h.endDate | date:'dd MMM yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Total Days</span>
+          <span class="info-value">{{ details()?.days?.length || 0 }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Request Date</span>
+          <span class="info-value">{{ h.requestDate | date:'dd MMM yyyy' }}</span>
         </div>
       </div>
-      @if (h.empRemarks) {
-        <p class="remarks"><strong>Remarks:</strong> {{ h.empRemarks }}</p>
-      }
-    </mat-card>
 
+      @if (h.empRemarks) {
+        <div class="remarks-box">
+          <span class="info-label">Remarks</span>
+          <p>{{ h.empRemarks }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- Actions -->
     @if (actions().length) {
-      <div class="actions">
+      <div class="action-bar">
         @for (a of actions(); track a.processId) {
-          <button mat-flat-button [color]="a.colorTheme || 'primary'" (click)="takeAction(a)">
-            {{ a.buttonName }}
-          </button>
+          @if (+a.processId === 1) {
+            <button mat-stroked-button (click)="takeAction(a)">
+              <mat-icon>edit</mat-icon> {{ a.buttonName }}
+            </button>
+          } @else {
+            <button mat-flat-button
+                    [style.background]="a.colorTheme || '#3b82f6'"
+                    style="color: #fff"
+                    (click)="takeAction(a)">
+              {{ a.buttonName }}
+            </button>
+          }
         }
-        <button mat-stroked-button (click)="edit()"><mat-icon>edit</mat-icon> Edit</button>
       </div>
     }
 
-    <mat-card class="info-card">
-      <mat-card-title>Leave Days</mat-card-title>
-      <table mat-table [dataSource]="details()?.days || []">
-        <ng-container matColumnDef="leaveDate">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let d">{{ d.leaveDate | date:'dd/MM/yyyy' }}</td>
-        </ng-container>
-        <ng-container matColumnDef="dayName">
-          <th mat-header-cell *matHeaderCellDef>Day</th>
-          <td mat-cell *matCellDef="let d">{{ d.dayName }}</td>
-        </ng-container>
-        <ng-container matColumnDef="dayLeaveType">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
-          <td mat-cell *matCellDef="let d">{{ d.dayLeaveType }}</td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="dayColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: dayColumns"></tr>
-      </table>
-    </mat-card>
-
-    <mat-card class="info-card">
-      <mat-card-title>Process History</mat-card-title>
-      <table mat-table [dataSource]="history()">
-        <ng-container matColumnDef="processDate">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let h">{{ h.processDate | date:'dd/MM/yyyy HH:mm' }}</td>
-        </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let h">{{ h.status }}</td>
-        </ng-container>
-        <ng-container matColumnDef="processByName">
-          <th mat-header-cell *matHeaderCellDef>By</th>
-          <td mat-cell *matCellDef="let h">{{ h.processByName }} ({{ h.processByCode }})</td>
-        </ng-container>
-        <ng-container matColumnDef="remarks">
-          <th mat-header-cell *matHeaderCellDef>Remarks</th>
-          <td mat-cell *matCellDef="let h">{{ h.remarks }}</td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: historyColumns"></tr>
-      </table>
-    </mat-card>
+    <!-- Leave Days -->
+    @if (details()?.days?.length) {
+      <div class="detail-card">
+        <h4 class="section-title">Leave Days</h4>
+        <table mat-table [dataSource]="details()?.days || []">
+          <ng-container matColumnDef="leaveDate">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let d">{{ d.leaveDate | date:'dd MMM yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="dayName">
+            <th mat-header-cell *matHeaderCellDef>Day</th>
+            <td mat-cell *matCellDef="let d">{{ d.dayName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="dayLeaveType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let d">{{ d.dayLeaveType }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="dayColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: dayColumns"></tr>
+        </table>
+      </div>
+    }
   }
 </div>

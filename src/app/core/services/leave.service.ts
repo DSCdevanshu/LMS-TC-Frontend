@@ -41,4 +41,8 @@ export class LeaveService extends BaseService {
     const params = new HttpParams().set('month', month).set('year', year);
     return this.http.get<any>(`${this.baseUrl}/LeaveRequest/getUserCalendarData`, { params });
   }
+
+  canCreateForOthers(): Observable<any> {
+    return this.get('LeaveRequest/canCreateForOthers');
+  }
 }

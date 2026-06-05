@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
     <mat-dialog-content>
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Remarks</mat-label>
-        <textarea matInput rows="3" [formControl]="control"></textarea>
+        <textarea matInput rows="4" [formControl]="control" class="remarks-textarea"></textarea>
       </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -21,7 +21,11 @@ import { MatButtonModule } from '@angular/material/button';
       <button mat-flat-button color="primary" (click)="ref.close(control.value || '')">Confirm</button>
     </mat-dialog-actions>
   `,
-  styles: [`.w-full{width:100%}`],
+  styles: [`
+    .w-full { width: 100%; }
+    :host ::ng-deep .mat-mdc-dialog-content { padding: 16px 24px !important; overflow: visible; }
+    .remarks-textarea { min-height: 80px; max-height: 200px; resize: vertical; }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RemarksDialog {

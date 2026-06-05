@@ -1,7 +1,118 @@
-.page { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; max-width: 900px; margin: 0 auto; }
-.page-header { display: flex; justify-content: space-between; align-items: center; }
-.form-card { padding: 16px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.full { grid-column: 1 / -1; }
-.actions { display: flex; justify-content: flex-end; gap: 8px; }
-@media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+.page { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.page-header h2 { margin: 0; font-size: 22px; font-weight: 600; }
+.muted { margin: 4px 0 0; color: #6b7280; font-size: 13px; }
+
+.layout { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+// Form card
+.form-card { padding: 24px; background: #fff; border: 1px solid #dbeafe; box-shadow: none; }
+.form-card mat-card-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+.form-card form { display: flex; flex-direction: column; gap: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+.full { width: 100%; }
+.form-card mat-form-field { width: 100%; }
+.form-card textarea { min-height: 60px; max-height: 120px; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
+
+.day-count {
+  font-size: 13px; color: #374151; display: flex; align-items: center; gap: 12px;
+  &.error { color: #ef4444; }
+}
+.range-error { font-size: 12px; color: #ef4444; font-weight: 500; }
+
+// Right panel
+.right-panel { display: flex; flex-direction: column; gap: 12px; width: 340px; }
+
+// Calendar
+.calendar-card { padding: 12px; background: #fff; border: 1px solid #dbeafe; box-shadow: none; }
+.calendar-header { display: flex; gap: 6px; margin-bottom: 2px; align-items: center; }
+.cal-select { flex: 1; }
+.reset-btn { min-width: 0; padding: 0 8px; }
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  text-align: center;
+}
+
+.cal-weekday {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+.cal-day {
+  width: 32px; height: 32px;
+  margin: 1px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 50%;
+  cursor: default;
+  position: relative;
+
+  &.empty { pointer-events: none; }
+  &.today { font-weight: 700; box-shadow: inset 0 0 0 2px #3b82f6; }
+  &.sunday { color: #ef4444; }
+
+  &.has-event { font-weight: 600; color: #fff; }
+  &.cal-approved { background: #16a34a; }
+  &.cal-pending { background: #f59e0b; }
+  &.cal-onhold { background: #3b82f6; }
+  &.cal-holiday { background: #8b5cf6; }
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  &.approved { background: #16a34a; }
+  &.pending { background: #f59e0b; }
+  &.onhold { background: #3b82f6; }
+  &.holiday { background: #8b5cf6; }
+}
+
+// Leave Balance
+.balance-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.balance-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+
+  mat-icon { font-size: 24px; width: 24px; height: 24px; }
+  &.paid { border-left: 4px solid #3b82f6; mat-icon { color: #3b82f6; } }
+  &.free { border-left: 4px solid #16a34a; mat-icon { color: #16a34a; } }
+  &.short { border-left: 4px solid #f59e0b; mat-icon { color: #f59e0b; } }
+}
+
+.bal-info { display: flex; flex-direction: column; }
+.bal-value { font-size: 18px; font-weight: 700; line-height: 1.2; }
+.bal-label { font-size: 11px; color: #6b7280; }

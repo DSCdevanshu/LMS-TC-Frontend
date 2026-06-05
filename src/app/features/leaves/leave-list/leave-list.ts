@@ -1,81 +1,147 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
+import { ViewChild, AfterViewInit } from '@angular/core';
 import { LeaveService } from '../../../core/services/leave.service';
-import { LookupService } from '../../../core/services/lookup.service';
+import { LookupService, LookupFlags } from '../../../core/services/lookup.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { LookupFlags } from '../../../core/services/lookup.service';
+import { RowActionsComponent } from '../../../shared/components/row-actions/row-actions';
 import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
+import { LeaveCodePipe } from '../../../core/pipes/leave-code.pipe';
 
 @Component({
   selector: 'app-leave-list',
   imports: [
     ReactiveFormsModule, RouterLink, DatePipe,
-    MatTableModule, MatPaginatorModule,
+    MatTableModule, MatSortModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatDatepickerModule,
-    MatButtonModule, MatIconModule, MatChipsModule, MatProgressBarModule,
-    DateInputMaskDirective
+    MatButtonModule, MatIconModule, MatProgressBarModule,
+    RowActionsComponent, DateInputMaskDirective, LeaveCodePipe
   ],
   templateUrl: './leave-list.html',
   styleUrl: './leave-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LeaveListComponent implements OnInit {
+export class LeaveListComponent implements OnInit, AfterViewInit {
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly leaveService = inject(LeaveService);
   private readonly lookup = inject(LookupService);
+  private readonly auth = inject(AuthService);
   private readonly notification = inject(NotificationService);
-  private readonly router = inject(Router);
+
+  @ViewChild(MatSort) sort!: MatSort;
 
   readonly loading = signal(false);
+  readonly leaveView = signal<string>('my');
   readonly leaveTypes = signal<any[]>([]);
-  readonly displayedColumns = ['leaveReqID', 'employeeName', 'leaveTypeName', 'startDate', 'endDate', 'totalDays', 'currentStatusName', 'actions'];
+  readonly employees = signal<any[]>([]);
+  readonly departments = signal<any[]>([]);
+  readonly leaveProcesses = signal<any[]>([]);
   readonly dataSource = new MatTableDataSource<any>([]);
+
+  readonly rowActions = [
+    { key: 'view', label: 'View Details', icon: 'visibility', color: '#2563eb' }
+  ];
+
+  get isMyLeaves(): boolean { return this.leaveView() === 'my'; }
+
+  get displayedColumns(): string[] {
+    return this.isMyLeaves
+      ? ['leaveReqID', 'leaveTypeName', 'startDate', 'endDate', 'totalDays', 'currentStatusName', 'requestDate', 'actions']
+      : ['leaveReqID', 'employeeName', 'departmentName', 'leaveTypeName', 'startDate', 'endDate', 'totalDays', 'currentStatusName', 'actions'];
+  }
 
   readonly filterForm = this.fb.group({
     dateFrom: [null as Date | null],
     dateTo: [null as Date | null],
-    leaveTypeid: [0],
-    processID: [0]
+    leaveTypeid: [null as number | null],
+    leaveUserId: [null as number | null],
+    depId: [null as number | null],
+    processID: [null as number | null]
   });
 
   ngOnInit(): void {
-    this.lookup.getDropdownData(LookupFlags.LeaveTypes).subscribe(r => this.leaveTypes.set(r.data ?? []));
+    const view = this.route.snapshot.data['leaveView'] ?? 'my';
+    this.leaveView.set(view);
+
+    if (this.isMyLeaves) {
+      this.lookup.getDropdownData(LookupFlags.LeaveTypes).subscribe(r => this.leaveTypes.set(r.data ?? []));
+      this.lookup.getDropdownData(LookupFlags.LeaveProcess).subscribe(r => this.leaveProcesses.set(r.data ?? []));
+    } else {
+      this.lookup.getDropdownData(LookupFlags.LeaveTypeDropDown).subscribe(r => this.leaveTypes.set(r.data ?? []));
+      this.lookup.getDropdownData(LookupFlags.LeaveProcessDropDown).subscribe(r => this.leaveProcesses.set(r.data ?? []));
+      this.lookup.getDropdownData(LookupFlags.AuthorizedEmployees).subscribe(r => this.employees.set(r.data ?? []));
+      this.lookup.getDropdownData(LookupFlags.AuthorizedDepartments).subscribe(r => this.departments.set(r.data ?? []));
+    }
+
     this.search();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;
   }
 
   search(): void {
     const v = this.filterForm.value;
     this.loading.set(true);
-    this.leaveService.list({
+
+    const payload: any = {
       dateFrom: v.dateFrom ? this.iso(v.dateFrom) : null,
       dateTo: v.dateTo ? this.iso(v.dateTo) : null,
-      leaveTypeid: v.leaveTypeid || 0,
-      processID: v.processID || 0
-    }).subscribe({
-      next: (rows) => { this.dataSource.data = rows ?? []; this.loading.set(false); },
-      error: () => { this.notification.error('Load Failed', 'Could not load leave list.'); this.loading.set(false); }
+      leaveTypeid: v.leaveTypeid || null,
+      processID: v.processID || null,
+      depId: v.depId || null
+    };
+
+    if (this.isMyLeaves) {
+      payload.leaveUserId = this.auth.getUserId();
+    } else {
+      payload.leaveUserId = v.leaveUserId || null;
+    }
+
+    this.leaveService.list(payload).subscribe({
+      next: (res) => {
+        this.dataSource.data = res?.data ?? [];
+        this.loading.set(false);
+      },
+      error: () => {
+        this.notification.error('Load Failed', 'Could not load leave list.');
+        this.loading.set(false);
+      }
     });
   }
 
   reset(): void {
-    this.filterForm.reset({ dateFrom: null, dateTo: null, leaveTypeid: 0, processID: 0 });
+    this.filterForm.reset();
     this.search();
   }
 
-  view(row: any): void {
-    void this.router.navigate(['/leaves', row?.leaveReqID]);
+  onAction(key: string, row: any): void {
+    if (key === 'view') {
+      void this.router.navigate(['/leaves', row.leaveReqID]);
+    }
+  }
+
+  statusGroup(status: string): string {
+    const s = (status ?? '').toLowerCase();
+    if (s.includes('approved')) return 'approved';
+    if (s.includes('hold')) return 'onhold';
+    if (s.includes('rejected') || s.includes('cancel')) return 'rejected';
+    if (s.includes('draft')) return 'draft';
+    return 'pending';
   }
 
   private iso(d: Date): string {

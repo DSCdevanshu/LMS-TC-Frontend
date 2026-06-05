@@ -1,76 +1,108 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit, AfterViewInit, ViewChild, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DesignationService } from '../../../core/services/designation.service';
 import { NotificationService } from '../../../core/services/notification.service';
-
+import { DesignationDialogComponent } from './designation-dialog';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { RowActionsComponent, RowAction } from '../../../shared/components/row-actions/row-actions';
 
 @Component({
   selector: 'app-designation-list',
   imports: [
-    ReactiveFormsModule, MatTableModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatCardModule, MatProgressBarModule
+    FormsModule, MatTableModule, MatButtonModule, MatIconModule,
+    MatFormFieldModule, MatInputModule, MatProgressBarModule, MatSortModule,
+    MatDialogModule, RowActionsComponent
   ],
   templateUrl: './designation-list.html',
   styleUrl: './designation-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DesignationListComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
+export class DesignationListComponent implements OnInit, AfterViewInit {
   private readonly service = inject(DesignationService);
   private readonly notification = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(false);
-  readonly editingId = signal<number | null>(null);
-  readonly displayedColumns = ['designationId', 'title', 'actions'];
+  readonly displayedColumns = ['title', 'totalEmployees', 'actions'];
   readonly dataSource = new MatTableDataSource<any>([]);
+  readonly rowActions: RowAction[] = [
+    { key: 'edit', label: 'Edit', icon: 'edit', color: 'blue' },
+    { key: 'delete', label: 'Delete', icon: 'delete', color: 'red' }
+  ];
 
-  readonly form = this.fb.group({
-    title: ['', Validators.required]
-  });
+  filterTitle = '';
 
-  ngOnInit(): void { this.refresh(); }
+  @ViewChild(MatSort) sort!: MatSort;
+
+  ngOnInit(): void {
+    this.refresh();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;
+    this.sort.active = 'title';
+    this.sort.direction = 'asc';
+    this.sort.sortChange.emit({ active: 'title', direction: 'asc' });
+  }
 
   refresh(): void {
     this.loading.set(true);
     this.service.list().subscribe({
-      next: (res) => { this.dataSource.data = res.data ?? []; this.loading.set(false); },
+      next: (res) => { this.dataSource.data = res.data ?? []; this.applyFilter(); this.loading.set(false); },
       error: () => { this.notification.error('Load Failed', 'Could not load designations.'); this.loading.set(false); }
     });
   }
 
-  edit(row: any): void {
-    this.editingId.set(row?.designationId ?? null);
-    this.form.patchValue({ title: row?.title ?? '' });
+  applyFilter(): void {
+    const title = this.filterTitle.toLowerCase().trim();
+    this.dataSource.filterPredicate = (row: any) => {
+      return !title || (row.title ?? '').toLowerCase().includes(title);
+    };
+    this.dataSource.filter = title;
   }
 
-  cancel(): void {
-    this.editingId.set(null);
-    this.form.reset({ title: '' });
+  onAction(key: string, row: any): void {
+    switch (key) {
+      case 'edit': this.openDialog(row); break;
+      case 'delete': this.remove(row); break;
+    }
   }
 
-  save(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    const payload = { title: this.form.value.title ?? '' };
-    const id = this.editingId();
-    const obs = id ? this.service.update(id, payload) : this.service.create(payload);
-    obs.subscribe({
-      next: () => { this.notification.success('Saved', 'Designation saved.'); this.cancel(); this.refresh(); },
-      error: () => this.notification.error('Save Failed', 'Could not save designation.')
+  openDialog(row?: any): void {
+    const ref = this.dialog.open(DesignationDialogComponent, {
+      width: '480px',
+      data: { designation: row ?? null }
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result) this.refresh();
     });
   }
 
   remove(row: any): void {
-    if (!row?.designationId || !confirm(`Delete ${row?.title}?`)) return;
-    this.service.remove(row?.designationId).subscribe({
-      next: () => { this.notification.success('Deleted', 'Designation removed.'); this.refresh(); },
-      error: () => this.notification.error('Delete Failed', 'Could not delete designation.')
+    if (!row?.designationId) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Designation',
+        message: `Are you sure you want to delete "${row.title}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        color: 'warn'
+      }
+    });
+    ref.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.service.remove(row.designationId).subscribe({
+        next: () => { this.notification.success('Deleted', 'Designation removed.'); this.refresh(); },
+        error: () => this.notification.error('Delete Failed', 'Could not delete designation.')
+      });
     });
   }
 }

@@ -1,7 +1,10 @@
-.page { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
-.page-header h2 { margin: 0; }
-.form-card { padding: 16px; }
-.form-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
-.actions { display: flex; gap: 8px; padding-top: 6px; }
-.table-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
+.page { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.page-header h2 { margin: 0; font-size: 22px; font-weight: 600; }
+.muted { margin: 4px 0 0; color: #6b7280; font-size: 13px; }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: start; }
+.filters mat-form-field { flex: 1 1 220px; min-width: 180px; }
+.table-card { background: #fff; border-radius: 8px; border: 1px solid #dbeafe; overflow: auto; }
 table { width: 100%; }
+th.mat-mdc-header-cell { white-space: nowrap; }
+.empty td { text-align: center; padding: 24px; color: #6b7280; }

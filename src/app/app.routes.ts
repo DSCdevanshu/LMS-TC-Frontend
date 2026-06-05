@@ -28,13 +28,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/profile/my-profile/my-profile').then(m => m.MyProfileComponent)
       },
 
-      // Directory
-      {
-        path: 'directory',
-        data: { title: 'Directory' },
-        loadComponent: () => import('./features/directory/directory').then(m => m.DirectoryComponent)
-      },
-
       // Employee Management
       {
         path: 'employees/manage',
@@ -77,11 +70,6 @@ export const routes: Routes = [
         path: 'leaves/all',
         data: { title: 'All Leaves', leaveView: 'all' },
         loadComponent: () => import('./features/leaves/leave-list/leave-list').then(m => m.LeaveListComponent)
-      },
-      {
-        path: 'leaves/balances',
-        data: { title: 'Leave Balances' },
-        loadComponent: () => import('./features/leaves/leave-balance/leave-balance').then(m => m.LeaveBalanceComponent)
       },
       {
         path: 'leaves/:id',
