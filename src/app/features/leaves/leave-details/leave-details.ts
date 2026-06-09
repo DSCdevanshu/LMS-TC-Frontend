@@ -64,8 +64,8 @@ export class LeaveDetailsComponent implements OnInit {
         this.history.set(h.data ?? []);
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Could not load leave details.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Could not load leave details.');
         this.loading.set(false);
       }
     });
@@ -93,7 +93,7 @@ export class LeaveDetailsComponent implements OnInit {
           this.notification.success('Success', res?.message || `Leave ${action?.buttonName?.toLowerCase()}.`);
           this.refresh();
         },
-        error: () => this.notification.error('Action Failed', 'Could not update leave status.')
+        error: (err) => this.notification.error('Action Failed', err?.message || 'Could not update leave status.')
       });
     });
   }

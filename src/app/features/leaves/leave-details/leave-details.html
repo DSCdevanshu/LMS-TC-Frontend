@@ -20,7 +20,7 @@
                  (mouseenter)="activeStep.set($index)" (mouseleave)="activeStep.set(-1)">
               <div class="step-dot" [style.background]="step.colorTheme || '#3b82f6'">
                 <span class="dot-letter">{{ (step.status || '?').charAt(0) }}</span>
-              </div>
+              </div>  
               @if (!last) { <div class="step-line"></div> }
               <div class="step-label">{{ step.status }}</div>
 

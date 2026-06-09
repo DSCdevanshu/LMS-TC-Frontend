@@ -69,8 +69,8 @@ export class EmployeeDetailsComponent implements OnInit {
         this.managers.set(res.mgrs.data ?? []);
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Unable to load employee.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Unable to load employee.');
         this.loading.set(false);
       }
     });

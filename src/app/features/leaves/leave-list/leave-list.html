@@ -11,19 +11,27 @@
 
   <div class="filter-card">
     <form class="filters" [formGroup]="filterForm" (ngSubmit)="search()">
-      <mat-form-field appearance="outline">
-        <mat-label>From Date</mat-label>
-        <input matInput [matDatepicker]="from" formControlName="dateFrom" appDateInputMask />
-        <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
-        <mat-datepicker #from></mat-datepicker>
-      </mat-form-field>
+      @if (!isMyLeaves) {
+        <mat-form-field appearance="outline">
+          <mat-label>Department</mat-label>
+          <mat-select formControlName="depId" (selectionChange)="onDepartmentChange($event.value)">
+            <mat-option [value]="null">All</mat-option>
+            @for (d of departments(); track d.value) {
+              <mat-option [value]="+d.value!">{{ d.text }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>To Date</mat-label>
-        <input matInput [matDatepicker]="to" formControlName="dateTo" appDateInputMask />
-        <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
-        <mat-datepicker #to></mat-datepicker>
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Employee</mat-label>
+          <mat-select formControlName="leaveUserId">
+            <mat-option [value]="null">All</mat-option>
+            @for (e of filteredEmployees(); track e.value) {
+              <mat-option [value]="+e.value!">{{ e.text }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
 
       <mat-form-field appearance="outline">
         <mat-label>Leave Type</mat-label>
@@ -45,27 +53,19 @@
         </mat-select>
       </mat-form-field>
 
-      @if (!isMyLeaves) {
-        <mat-form-field appearance="outline">
-          <mat-label>Employee</mat-label>
-          <mat-select formControlName="leaveUserId">
-            <mat-option [value]="null">All</mat-option>
-            @for (e of employees(); track e.value) {
-              <mat-option [value]="+e.value!">{{ e.text }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>From Date</mat-label>
+        <input matInput [matDatepicker]="from" formControlName="dateFrom" appDateInputMask />
+        <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
+        <mat-datepicker #from></mat-datepicker>
+      </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Department</mat-label>
-          <mat-select formControlName="depId">
-            <mat-option [value]="null">All</mat-option>
-            @for (d of departments(); track d.value) {
-              <mat-option [value]="+d.value!">{{ d.text }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      }
+      <mat-form-field appearance="outline">
+        <mat-label>To Date</mat-label>
+        <input matInput [matDatepicker]="to" formControlName="dateTo" appDateInputMask />
+        <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
+        <mat-datepicker #to></mat-datepicker>
+      </mat-form-field>
 
       <div class="filter-actions">
         <button mat-flat-button color="primary" type="submit"><mat-icon>search</mat-icon> Search</button>

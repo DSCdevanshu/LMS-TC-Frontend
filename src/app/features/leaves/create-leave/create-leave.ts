@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -37,9 +37,18 @@ export class CreateLeaveComponent implements OnInit {
   readonly submitting = signal(false);
   readonly editId = signal<number | null>(null);
   readonly leaveTypes = signal<any[]>([]);
-  readonly employees = signal<any[]>([]);
+  readonly allEmployees = signal<any[]>([]);
+  readonly departments = signal<any[]>([]);
+  readonly selectedDepId = signal<number | null>(null);
   readonly canCreateForOthers = signal(false);
   readonly balance = signal<any>(null);
+
+  readonly filteredEmployees = computed(() => {
+    const depId = this.selectedDepId();
+    const all = this.allEmployees();
+    if (!depId) return all;
+    return all.filter(e => +e.extraData1 === depId);
+  });
 
   // Calendar state
   readonly calendarMonth = signal(new Date().getMonth() + 1);
@@ -83,7 +92,8 @@ export class CreateLeaveComponent implements OnInit {
     this.leaveService.canCreateForOthers().subscribe(r => {
       if (r.data === 1) {
         this.canCreateForOthers.set(true);
-        this.lookup.getDropdownData(LookupFlags.Employees).subscribe(e => this.employees.set(e.data ?? []));
+        this.lookup.getDropdownData(LookupFlags.AuthorizedEmployees).subscribe(e => this.allEmployees.set(e.data ?? []));
+        this.lookup.getDropdownData(LookupFlags.AuthorizedDepartments).subscribe(d => this.departments.set(d.data ?? []));
       }
     });
     this.loadCalendar();
@@ -103,6 +113,16 @@ export class CreateLeaveComponent implements OnInit {
           empRemarks: h.empRemarks ?? ''
         });
       });
+    }
+  }
+
+  onDepartmentChange(depId: number | null): void {
+    this.selectedDepId.set(depId);
+    // Reset employee if not in filtered list
+    const currentUserId = this.form.value.userId;
+    if (currentUserId && depId) {
+      const exists = this.filteredEmployees().some(e => +e.value === currentUserId);
+      if (!exists) this.form.patchValue({ userId: null });
     }
   }
 
@@ -184,8 +204,8 @@ export class CreateLeaveComponent implements OnInit {
           this.loadCalendar();
         }
       },
-      error: () => {
-        this.notification.error('Submit Failed', 'Could not submit leave request.');
+      error: (err) => {
+        this.notification.error('Submit Failed', err?.message || 'Could not submit leave request.');
         this.submitting.set(false);
       }
     });

@@ -4,20 +4,25 @@ import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { DesignationService } from '../../../core/services/designation.service';
+import { MasterService } from '../../../core/services/master.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
-  selector: 'app-designation-dialog',
+  selector: 'app-company-dialog',
   imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   template: `
-    <h2 mat-dialog-title>{{ isEdit ? 'Edit' : 'Add' }} Designation</h2>
+    <h2 mat-dialog-title>{{ isEdit ? 'Edit' : 'Add' }} Company</h2>
     <mat-dialog-content>
       <form [formGroup]="form" class="dialog-form">
         <mat-form-field appearance="outline" class="full">
-          <mat-label>Title</mat-label>
-          <input matInput formControlName="title" />
-          <mat-error>Title is required</mat-error>
+          <mat-label>Company Code</mat-label>
+          <input matInput formControlName="companyCode" />
+          <mat-error>Company code is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="companyName" />
+          <mat-error>Company name is required</mat-error>
         </mat-form-field>
       </form>
     </mat-dialog-content>
@@ -35,34 +40,36 @@ import { NotificationService } from '../../../core/services/notification.service
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DesignationDialogComponent {
+export class CompanyDialogComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly service = inject(DesignationService);
+  private readonly service = inject(MasterService);
   private readonly notification = inject(NotificationService);
-  protected readonly ref = inject(MatDialogRef<DesignationDialogComponent>);
-  protected readonly data = inject<{ designation: any }>(MAT_DIALOG_DATA);
+  protected readonly ref = inject(MatDialogRef<CompanyDialogComponent>);
+  protected readonly data = inject<{ company: any }>(MAT_DIALOG_DATA);
 
-  readonly isEdit = !!this.data.designation;
+  readonly isEdit = !!this.data.company;
   readonly saving = signal(false);
 
   readonly form = this.fb.group({
-    title: [this.data.designation?.title ?? '', Validators.required]
+    companyCode: [this.data.company?.companyCode ?? '', Validators.required],
+    companyName: [this.data.company?.companyName ?? '', Validators.required]
   });
 
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
-    const payload = { title: this.form.getRawValue().title ?? '' };
+    const v = this.form.getRawValue();
+    const payload = { companyCode: v.companyCode ?? '', companyName: v.companyName ?? '' };
     const obs = this.isEdit
-      ? this.service.update(this.data.designation.designationId, payload)
-      : this.service.create(payload);
+      ? this.service.updateCompany(this.data.company.companyId, payload)
+      : this.service.createCompany(payload);
     obs.subscribe({
-      next: () => {
-        this.notification.success('Saved', `Designation ${this.isEdit ? 'updated' : 'created'}.`);
+      next: (res) => {
+        this.notification.success('Saved', res?.message || `Company ${this.isEdit ? 'updated' : 'created'}.`);
         this.ref.close(true);
       },
       error: (err) => {
-        this.notification.error('Failed', err?.message || 'Could not save designation.');
+        this.notification.error('Failed', err?.error?.message || 'Could not save company.');
         this.saving.set(false);
       }
     });

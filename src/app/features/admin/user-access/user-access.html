@@ -1,57 +1,91 @@
 <div class="page">
-  <div class="page-header"><h2>User Access</h2></div>
+  <div class="page-header">
+    <div>
+      <h2>User Access</h2>
+      <p class="muted">Manage user roles and permissions</p>
+    </div>
+  </div>
 
   @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
 
-  <mat-card class="form-card">
-    <mat-form-field appearance="outline" class="user-select">
-      <mat-label>Select User</mat-label>
-      <mat-select [formControl]="userControl">
-        @for (u of users(); track u.value) {
-          <mat-option [value]="+u.value!">{{ u.text }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  </mat-card>
+  <div class="detail-card">
+    <h4 class="section-title">Select User</h4>
+    <div class="select-row">
+      <mat-form-field appearance="outline" class="user-select">
+        <mat-label>Department</mat-label>
+        <mat-select [value]="selectedDepId()" (selectionChange)="onDepartmentChange($event.value)">
+          <mat-option [value]="null">All Departments</mat-option>
+          @for (dep of departments(); track dep.value) {
+            <mat-option [value]="+dep.value!">{{ dep.text }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="user-select">
+        <mat-label>Employee</mat-label>
+        <mat-select [formControl]="userControl">
+          @for (u of filteredEmployees(); track u.value) {
+            <mat-option [value]="+u.value!">{{ u.text }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
 
   @if (userControl.value) {
-    <mat-card class="block">
-      <mat-card-title>Roles</mat-card-title>
+    <div class="detail-card">
+      <h4 class="section-title">Roles</h4>
       <div class="roles-grid">
         @for (r of roles(); track r.id) {
-          <mat-checkbox
-            [checked]="isRoleSelected(r.id)"
-            (change)="toggleRole(r.id, $event.checked)">
-            {{ r.name }}
-          </mat-checkbox>
+          <div class="role-card" [class.selected]="isRoleSelected(r.id)" (click)="toggleRole(r.id, !isRoleSelected(r.id))">
+            <mat-checkbox
+              [checked]="isRoleSelected(r.id)"
+              (change)="toggleRole(r.id, $event.checked)"
+              (click)="$event.stopPropagation()">
+            </mat-checkbox>
+            <span class="role-name">{{ r.name }}</span>
+          </div>
         }
       </div>
-    </mat-card>
+    </div>
 
-    <mat-card class="block">
-      <mat-card-title>Custom Permissions</mat-card-title>
+    <div class="detail-card">
+      <h4 class="section-title">Permissions</h4>
       <mat-accordion multi>
         @for (group of groupedPermissions(); track group.category) {
           <mat-expansion-panel>
             <mat-expansion-panel-header>
-              <mat-panel-title>{{ group.category }}</mat-panel-title>
+              <mat-panel-title>
+                <mat-icon class="cat-icon">folder</mat-icon>
+                {{ group.category }}
+                <span class="cat-count">{{ group.permissions?.length || 0 }}</span>
+              </mat-panel-title>
             </mat-expansion-panel-header>
             <div class="perm-grid">
               @for (p of group.permissions; track p.id) {
-                <mat-checkbox
-                  [checked]="isPermSelected(p.id)"
-                  (change)="togglePerm(p.id, $event.checked)">
-                  {{ p.name }}
-                </mat-checkbox>
+                <div class="perm-card" [class.selected]="isPermSelected(p.id)" (click)="togglePerm(p.id, !isPermSelected(p.id))">
+                  <mat-checkbox
+                    [checked]="isPermSelected(p.id)"
+                    (change)="togglePerm(p.id, $event.checked)"
+                    (click)="$event.stopPropagation()">
+                  </mat-checkbox>
+                  <div class="perm-info">
+                    <span class="perm-name">{{ p.name }}</span>
+                    @if (p.description) {
+                      <span class="perm-desc">{{ p.description }}</span>
+                    }
+                  </div>
+                </div>
               }
             </div>
           </mat-expansion-panel>
         }
       </mat-accordion>
-    </mat-card>
+    </div>
 
-    <div class="actions">
+    <div class="action-bar">
       <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+        <mat-icon>save</mat-icon>
         @if (saving()) { Saving... } @else { Save Access }
       </button>
     </div>

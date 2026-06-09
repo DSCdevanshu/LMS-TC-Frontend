@@ -201,8 +201,8 @@ export class CreateEmployeeComponent implements OnInit {
         this.designations.set(designations.data ?? []);
         this.managers.set(managers.data ?? []);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Unable to load dropdown values.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Unable to load dropdown values.');
       },
       complete: () => this.isLoading.set(false)
     });

@@ -36,7 +36,7 @@ export class LeaveTypesComponent implements OnInit {
     this.loading.set(true);
     this.leaveService.getLeaveTypes().subscribe({
       next: (res: any) => { this.dataSource.data = res?.data ?? []; this.loading.set(false); },
-      error: () => { this.notification.error('Load Failed', 'Could not load leave types.'); this.loading.set(false); }
+      error: (err) => { this.notification.error('Load Failed', err?.message || 'Could not load leave types.'); this.loading.set(false); }
     });
   }
 }

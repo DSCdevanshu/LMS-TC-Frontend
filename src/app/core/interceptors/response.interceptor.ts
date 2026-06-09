@@ -16,17 +16,21 @@ export const responseInterceptor: HttpInterceptorFn = (req, next) => {
 
         if (body && body.status === 0) {
           console.error('API Business Error:', body.message);
-          throw new Error(body.message ?? 'Business logic failure');
+          throw { apiError: true, message: body.message ?? 'Something went wrong' };
         }
       }
     }),
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
+    catchError((error) => {
+      if (error instanceof HttpErrorResponse && error.status === 401) {
         authService.logout();
         void router.navigate(['/login']);
       }
-      console.error('HTTP Error:', error.message);
-      return throwError(() => error);
+      // Extract message: API business error, HTTP error body, or generic
+      const msg = error?.message
+        || error?.error?.message
+        || 'Something went wrong';
+      console.error('HTTP Error:', msg);
+      return throwError(() => ({ message: msg, status: error?.status }));
     })
   );
 };

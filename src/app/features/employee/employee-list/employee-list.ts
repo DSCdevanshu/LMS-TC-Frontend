@@ -94,8 +94,8 @@ export class EmployeeListComponent implements OnInit {
         this.dataSource.data = res.data ?? [];
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Unable to load employees.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Unable to load employees.');
         this.loading.set(false);
       }
     });
@@ -131,7 +131,7 @@ export class EmployeeListComponent implements OnInit {
           this.notification.success('Deleted', `${row.empName} removed.`);
           this.search();
         },
-        error: () => this.notification.error('Delete Failed', 'Could not delete employee.')
+        error: (err) => this.notification.error('Delete Failed', err?.message || 'Could not delete employee.')
       });
     });
   }

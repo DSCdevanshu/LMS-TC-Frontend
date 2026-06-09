@@ -69,16 +69,16 @@ export class AppShellComponent implements OnInit {
 
     this.layoutService.getMyMenu().subscribe({
       next: (res) => this.menu.set(res.data ?? []),
-      error: () => {
-        this.notification.error('Menu Load Failed', 'Unable to load your menu.');
+      error: (err) => {
+        this.notification.error('Menu Load Failed', err?.message || 'Unable to load your menu.');
         this.menu.set([]);
       }
     });
 
     this.layoutService.getMyDetails().subscribe({
       next: (res) => this.profile.set(res.data ?? null),
-      error: () => {
-        this.notification.error('Profile Load Failed', 'Unable to load your profile.');
+      error: (err) => {
+        this.notification.error('Profile Load Failed', err?.message || 'Unable to load your profile.');
         this.profile.set(null);
       },
       complete: () => this.loading.set(false)

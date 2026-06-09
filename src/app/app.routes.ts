@@ -89,7 +89,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/employee/designation-list/designation-list').then(m => m.DesignationListComponent)
       },
       {
-        path: 'masters/leave-types',
+        path: 'leaves/leave-types',
         data: { title: 'Leave Types' },
         loadComponent: () => import('./features/masters/leave-types/leave-types').then(m => m.LeaveTypesComponent)
       },
@@ -97,6 +97,11 @@ export const routes: Routes = [
         path: 'masters/locations',
         data: { title: 'Locations' },
         loadComponent: () => import('./features/masters/locations/locations').then(m => m.LocationsComponent)
+      },
+      {
+        path: 'master/company',
+        data: { title: 'Companies' },
+        loadComponent: () => import('./features/masters/companies/companies').then(m => m.CompaniesComponent)
       },
       {
         path: 'masters/holidays',
@@ -114,11 +119,6 @@ export const routes: Routes = [
         path: 'admin/roles',
         data: { title: 'Roles & Permissions' },
         loadComponent: () => import('./features/admin/role-list/role-list').then(m => m.RoleListComponent)
-      },
-      {
-        path: 'admin/roles/new',
-        data: { title: 'New Role' },
-        loadComponent: () => import('./features/admin/role-edit/role-edit').then(m => m.RoleEditComponent)
       },
       {
         path: 'admin/roles/:id',

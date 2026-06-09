@@ -99,8 +99,8 @@ export class EditEmployeeComponent implements OnInit {
         }
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Unable to load employee.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Unable to load employee.');
         this.loading.set(false);
       }
     });
@@ -127,7 +127,7 @@ export class EditEmployeeComponent implements OnInit {
         this.photoChanged.set(false);
         this.notification.success('Removed', 'Photo removed successfully.');
       },
-      error: () => this.notification.error('Failed', 'Unable to remove photo.')
+      error: (err) => this.notification.error('Failed', err?.message || 'Unable to remove photo.')
     });
   }
 
@@ -172,8 +172,8 @@ export class EditEmployeeComponent implements OnInit {
               this.submitting.set(false);
               void this.router.navigate(['/employees', this.employeeId]);
             },
-            error: () => {
-              this.notification.error('Photo Failed', 'Employee saved but photo upload failed.');
+            error: (err) => {
+              this.notification.error('Photo Failed', err?.message || 'Employee saved but photo upload failed.');
               this.submitting.set(false);
             }
           });
@@ -183,8 +183,8 @@ export class EditEmployeeComponent implements OnInit {
           void this.router.navigate(['/employees', this.employeeId]);
         }
       },
-      error: () => {
-        this.notification.error('Update Failed', 'Unable to update employee.');
+      error: (err) => {
+        this.notification.error('Update Failed', err?.message || 'Unable to update employee.');
         this.submitting.set(false);
       }
     });

@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
-import { MatCardModule } from '@angular/material/card';
+import { forkJoin } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -19,7 +18,7 @@ import { NavHistoryService } from '../../../core/services/nav-history.service';
   selector: 'app-role-edit',
   imports: [
     ReactiveFormsModule,
-    MatCardModule, MatFormFieldModule, MatInputModule, MatCheckboxModule,
+    MatFormFieldModule, MatInputModule, MatCheckboxModule,
     MatButtonModule, MatIconModule, MatProgressBarModule, MatExpansionModule
   ],
   templateUrl: './role-edit.html',
@@ -48,11 +47,15 @@ export class RoleEditComponent implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    this.roleId = idParam && idParam !== 'new' ? Number(idParam) : null;
+    this.roleId = idParam ? Number(idParam) : null;
+    if (!this.roleId) {
+      void this.router.navigate(['/admin/roles']);
+      return;
+    }
 
     forkJoin({
       perms: this.service.listPermissions(),
-      role: this.roleId ? this.service.getRole(this.roleId) : of(null)
+      role: this.service.getRole(this.roleId)
     }).subscribe({
       next: ({ perms, role }) => {
         this.groupedPermissions.set(perms.data ?? []);
@@ -62,8 +65,8 @@ export class RoleEditComponent implements OnInit {
         }
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Could not load role/permissions.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Could not load role/permissions.');
         this.loading.set(false);
       }
     });
@@ -90,16 +93,14 @@ export class RoleEditComponent implements OnInit {
       roleName: this.form.value.roleName ?? '',
       permissionIds: Array.from(this.selected())
     };
-    const obs = this.roleId
-      ? this.service.updateRole(this.roleId, payload)
-      : this.service.createRole(payload);
+    const obs = this.service.updateRole(this.roleId!, payload);
     obs.subscribe({
       next: () => {
         this.notification.success('Saved', 'Role saved.');
         void this.router.navigate(['/admin/roles']);
       },
-      error: () => {
-        this.notification.error('Save Failed', 'Could not save role.');
+      error: (err) => {
+        this.notification.error('Save Failed', err?.message || 'Could not save role.');
         this.submitting.set(false);
       }
     });

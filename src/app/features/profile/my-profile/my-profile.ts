@@ -26,7 +26,7 @@ export class MyProfileComponent implements OnInit {
   ngOnInit(): void {
     this.layoutService.getMyDetails().subscribe({
       next: (res) => { this.profile.set(res.data ?? null); this.loading.set(false); },
-      error: () => { this.notification.error('Load Failed', 'Could not load profile.'); this.loading.set(false); }
+      error: (err) => { this.notification.error('Load Failed', err?.message || 'Could not load profile.'); this.loading.set(false); }
     });
   }
 }

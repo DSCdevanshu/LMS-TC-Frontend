@@ -57,7 +57,7 @@ export class DesignationListComponent implements OnInit, AfterViewInit {
     this.loading.set(true);
     this.service.list().subscribe({
       next: (res) => { this.dataSource.data = res.data ?? []; this.applyFilter(); this.loading.set(false); },
-      error: () => { this.notification.error('Load Failed', 'Could not load designations.'); this.loading.set(false); }
+      error: (err) => { this.notification.error('Load Failed', err?.message || 'Could not load designations.'); this.loading.set(false); }
     });
   }
 
@@ -101,7 +101,7 @@ export class DesignationListComponent implements OnInit, AfterViewInit {
       if (!confirmed) return;
       this.service.remove(row.designationId).subscribe({
         next: () => { this.notification.success('Deleted', 'Designation removed.'); this.refresh(); },
-        error: () => this.notification.error('Delete Failed', 'Could not delete designation.')
+        error: (err) => this.notification.error('Delete Failed', err?.message || 'Could not delete designation.')
       });
     });
   }

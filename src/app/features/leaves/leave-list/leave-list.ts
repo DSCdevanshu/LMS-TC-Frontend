@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -15,6 +15,7 @@ import { ViewChild, AfterViewInit } from '@angular/core';
 import { LeaveService } from '../../../core/services/leave.service';
 import { LookupService, LookupFlags } from '../../../core/services/lookup.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { LayoutService } from '../../../core/services/layout.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RowActionsComponent } from '../../../shared/components/row-actions/row-actions';
 import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
@@ -40,6 +41,7 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
   private readonly leaveService = inject(LeaveService);
   private readonly lookup = inject(LookupService);
   private readonly auth = inject(AuthService);
+  private readonly layout = inject(LayoutService);
   private readonly notification = inject(NotificationService);
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -47,10 +49,18 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
   readonly loading = signal(false);
   readonly leaveView = signal<string>('my');
   readonly leaveTypes = signal<any[]>([]);
-  readonly employees = signal<any[]>([]);
+  readonly allEmployees = signal<any[]>([]);
+  readonly selectedDepId = signal<number | null>(null);
   readonly departments = signal<any[]>([]);
   readonly leaveProcesses = signal<any[]>([]);
   readonly dataSource = new MatTableDataSource<any>([]);
+
+  readonly filteredEmployees = computed(() => {
+    const depId = this.selectedDepId();
+    const all = this.allEmployees();
+    if (!depId) return all;
+    return all.filter(e => +e.extraData1 === depId);
+  });
 
   readonly rowActions = [
     { key: 'view', label: 'View Details', icon: 'visibility', color: '#2563eb' }
@@ -65,8 +75,8 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
   }
 
   readonly filterForm = this.fb.group({
-    dateFrom: [null as Date | null],
-    dateTo: [null as Date | null],
+    dateFrom: [this.addDays(new Date(), -15) as Date | null],
+    dateTo: [this.addDays(new Date(), 15) as Date | null],
     leaveTypeid: [null as number | null],
     leaveUserId: [null as number | null],
     depId: [null as number | null],
@@ -83,8 +93,24 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
     } else {
       this.lookup.getDropdownData(LookupFlags.LeaveTypeDropDown).subscribe(r => this.leaveTypes.set(r.data ?? []));
       this.lookup.getDropdownData(LookupFlags.LeaveProcessDropDown).subscribe(r => this.leaveProcesses.set(r.data ?? []));
-      this.lookup.getDropdownData(LookupFlags.AuthorizedEmployees).subscribe(r => this.employees.set(r.data ?? []));
+      this.lookup.getDropdownData(LookupFlags.AuthorizedEmployees).subscribe(r => this.allEmployees.set(r.data ?? []));
       this.lookup.getDropdownData(LookupFlags.AuthorizedDepartments).subscribe(r => this.departments.set(r.data ?? []));
+
+      // Default Department & Employee to logged-in user
+      this.layout.getMyDetails().subscribe(res => {
+        const me = res?.data;
+        if (!me) { this.search(); return; }
+        const depId = me.departmentId ?? me.departmentID ?? me.depId ?? null;
+        const userId = me.userId ?? me.userID ?? this.auth.getUserId();
+        const depIdNum = depId != null ? +depId : null;
+        this.selectedDepId.set(depIdNum);
+        this.filterForm.patchValue({
+          depId: depIdNum,
+          leaveUserId: userId != null ? +userId : null
+        });
+        this.search();
+      });
+      return;
     }
 
     this.search();
@@ -92,6 +118,16 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+  }
+
+  onDepartmentChange(depId: number | null): void {
+    this.selectedDepId.set(depId);
+    // Reset employee if not in filtered list
+    const currentEmp = this.filterForm.value.leaveUserId;
+    if (currentEmp && depId) {
+      const exists = this.filteredEmployees().some(e => +e.value === currentEmp);
+      if (!exists) this.filterForm.patchValue({ leaveUserId: null });
+    }
   }
 
   search(): void {
@@ -117,15 +153,22 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
         this.dataSource.data = res?.data ?? [];
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Load Failed', 'Could not load leave list.');
+      error: (err) => {
+        this.notification.error('Load Failed', err?.message || 'Could not load leave list.');
         this.loading.set(false);
       }
     });
   }
 
   reset(): void {
-    this.filterForm.reset();
+    this.filterForm.reset({
+      dateFrom: this.addDays(new Date(), -15),
+      dateTo: this.addDays(new Date(), 15),
+      leaveTypeid: null,
+      leaveUserId: null,
+      depId: null,
+      processID: null
+    });
     this.search();
   }
 
@@ -148,5 +191,11 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
     const dd = String(d.getDate()).padStart(2, '0');
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     return `${d.getFullYear()}-${mm}-${dd}`;
+  }
+
+  private addDays(date: Date, days: number): Date {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
   }
 }

@@ -13,9 +13,19 @@
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         @if (canCreateForOthers()) {
           <mat-form-field appearance="outline" class="full">
+            <mat-label>Department</mat-label>
+            <mat-select [value]="selectedDepId()" (selectionChange)="onDepartmentChange($event.value)">
+              <mat-option [value]="null">All Departments</mat-option>
+              @for (dep of departments(); track dep.value) {
+                <mat-option [value]="+dep.value!">{{ dep.text }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
             <mat-label>Employee</mat-label>
             <mat-select formControlName="userId">
-              @for (emp of employees(); track emp.value) {
+              @for (emp of filteredEmployees(); track emp.value) {
                 <mat-option [value]="+emp.value!">{{ emp.text }}</mat-option>
               }
             </mat-select>

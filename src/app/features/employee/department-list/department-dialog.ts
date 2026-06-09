@@ -86,8 +86,8 @@ export class DepartmentDialogComponent implements OnInit {
         this.notification.success('Saved', `Department ${this.isEdit ? 'updated' : 'created'}.`);
         this.ref.close(true);
       },
-      error: () => {
-        this.notification.error('Failed', 'Could not save department.');
+      error: (err) => {
+        this.notification.error('Failed', err?.message || 'Could not save department.');
         this.saving = false;
       }
     });
