@@ -55,6 +55,28 @@
         <input matInput formControlName="lastName" />
       </mat-form-field>
       <mat-form-field appearance="outline">
+        <mat-label>Father's Name</mat-label>
+        <input matInput formControlName="fathersName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Mother's Name</mat-label>
+        <input matInput formControlName="mothersName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Date of Birth</mat-label>
+        <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="DD/MM/YYYY" />
+        <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+        <mat-datepicker #dobPicker></mat-datepicker>
+        <mat-error>Date of birth is required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Hire Date</mat-label>
+        <input matInput [matDatepicker]="hirePicker" formControlName="hireDate" placeholder="DD/MM/YYYY" />
+        <mat-datepicker-toggle matIconSuffix [for]="hirePicker"></mat-datepicker-toggle>
+        <mat-datepicker #hirePicker></mat-datepicker>
+        <mat-error>Hire date is required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" type="email" />
       </mat-form-field>
@@ -90,6 +112,22 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
+        <mat-label>Company</mat-label>
+        <mat-select formControlName="companyId">
+          @for (c of companies(); track c.companyId) {
+            <mat-option [value]="c.companyId">{{ c.companyName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Location</mat-label>
+        <mat-select formControlName="locationId">
+          @for (l of locations(); track l.locationId) {
+            <mat-option [value]="l.locationId">{{ l.locationName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
         <mat-label>Reporting Managers</mat-label>
         <mat-select formControlName="reportingManagerIds" multiple>
           @for (m of managers(); track m.value) {
@@ -97,6 +135,7 @@
           }
         </mat-select>
       </mat-form-field>
+      <mat-checkbox formControlName="canWorkFromHome" class="full">Can Work From Home</mat-checkbox>
       <mat-form-field appearance="outline">
         <mat-label>PAN</mat-label>
         <input matInput formControlName="pan" />

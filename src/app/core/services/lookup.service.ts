@@ -19,8 +19,11 @@ export const LookupFlags = {
 
 @Injectable({ providedIn: 'root' })
 export class LookupService extends BaseService {
-  getDropdownData(flag: string): Observable<any> {
-    const params = new HttpParams().set('flag', flag);
+  getDropdownData(flag: string, others?: string | number | null): Observable<any> {
+    let params = new HttpParams().set('flag', flag);
+    if (others != null && others !== '') {
+      params = params.set('others', String(others));
+    }
     return this.get('Home/GetDropdownData', params);
   }
 }

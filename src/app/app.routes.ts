@@ -109,6 +109,23 @@ export const routes: Routes = [
         loadComponent: () => import('./features/masters/holidays/holidays').then(m => m.HolidaysComponent)
       },
 
+      // Communications
+      {
+        path: 'communications/announcements',
+        data: { title: 'Announcements' },
+        loadComponent: () => import('./features/communication/announcements/announcements').then(m => m.AnnouncementsComponent)
+      },
+      {
+        path: 'communications/policies',
+        data: { title: 'Policies' },
+        loadComponent: () => import('./features/communication/policies/policies').then(m => m.PoliciesComponent)
+      },
+      {
+        path: 'feed',
+        data: { title: 'Feed' },
+        loadComponent: () => import('./features/communication/feed/feed').then(m => m.FeedComponent)
+      },
+
       // Administration
       {
         path: 'admin/users',

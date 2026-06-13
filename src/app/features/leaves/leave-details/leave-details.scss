@@ -3,6 +3,11 @@
 .page-header h2 { margin: 0; font-size: 22px; font-weight: 600; }
 .muted { margin: 4px 0 0; color: #6b7280; font-size: 13px; }
 
+// Two-column layout
+.layout { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+.main-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
 .detail-card {
   background: #fff; border: 1px solid #dbeafe; border-radius: 10px; padding: 20px;
   &:has(.timeline) { overflow: visible; }
@@ -31,7 +36,7 @@
 }
 
 // Info grid
-.info-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 16px; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
 @media (max-width: 700px) { .info-grid { grid-template-columns: 1fr 1fr; } }
 .info-item { display: flex; flex-direction: column; gap: 2px; }
 .info-label { font-size: 12px; color: #6b7280; font-weight: 500; }
@@ -40,17 +45,34 @@
 .remarks-box { margin-top: 16px; padding: 10px 14px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; }
 .remarks-box p { margin: 4px 0 0; font-size: 14px; }
 
-// Action buttons
+// Latest action summary
+.latest-action {
+  margin-top: 16px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+}
+.latest-action-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.latest-action-head .info-label { font-weight: 600; color: #374151; font-size: 13px; }
+.dot-mini { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.latest-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 600px) { .latest-grid { grid-template-columns: 1fr; } }
+.latest-remarks { margin-top: 12px; }
+
 .action-bar { display: flex; gap: 8px; flex-wrap: wrap; }
 
 // Timeline
 .timeline {
   display: flex;
   align-items: flex-start;
-  gap: 0;
-  overflow: visible;
-  padding: 8px 0 16px;
   justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0;
+  row-gap: 28px;
+  overflow: visible;
+  padding: 8px 0;
 }
 
 .timeline-step {
@@ -58,18 +80,18 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  min-width: 100px;
   flex: 0 0 auto;
+  width: 130px;
 }
 
 .step-dot {
   width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: #fff; cursor: pointer;
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
   .dot-letter { font-size: 16px; font-weight: 600; line-height: 1; }
-  &:hover { transform: scale(1.15); }
 }
+.timeline-step:hover .step-dot { transform: scale(1.12); box-shadow: 0 2px 8px rgba(0,0,0,.18); }
 
 .step-line {
   position: absolute;
@@ -92,28 +114,129 @@
 
 .step-popover {
   position: absolute;
-  top: 0;
-  left: calc(50% + 24px);
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
   background: #1e293b;
   color: #fff;
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 12px;
-  min-width: 220px;
-  z-index: 10000;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  white-space: nowrap;
-  .pop-row { margin: 3px 0; }
+  width: max-content;
+  max-width: 260px;
+  z-index: 100;
+  box-shadow: 0 6px 18px rgba(0,0,0,.22);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  .pop-row { margin: 3px 0; white-space: normal; word-break: break-word; }
   &::after {
     content: '';
     position: absolute;
-    top: 14px;
-    left: -6px;
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    border-right: 6px solid #1e293b;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #1e293b;
   }
 }
+.timeline-step:hover .step-popover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+// Right panel (calendar + balance)
+.right-panel { display: flex; flex-direction: column; gap: 12px; width: 340px; }
+@media (max-width: 900px) { .right-panel { width: 100%; } }
+
+.calendar-card { padding: 12px; background: #fff; border: 1px solid #dbeafe; box-shadow: none; }
+.calendar-header { display: flex; gap: 6px; margin-bottom: 2px; align-items: center; }
+.cal-select { flex: 1; }
+.reset-btn { min-width: 0; padding: 0 8px; }
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  text-align: center;
+}
+
+.cal-weekday {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+.cal-day {
+  width: 32px; height: 32px;
+  margin: 1px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 50%;
+  cursor: default;
+  position: relative;
+
+  &.empty { pointer-events: none; }
+  &.today { font-weight: 700; box-shadow: inset 0 0 0 2px #3b82f6; }
+  &.sunday { color: #ef4444; }
+
+  &.has-event { font-weight: 600; color: #fff; }
+  &.cal-approved { background: #16a34a; }
+  &.cal-pending { background: #f59e0b; }
+  &.cal-onhold { background: #3b82f6; }
+  &.cal-holiday { background: #8b5cf6; }
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  &.approved { background: #16a34a; }
+  &.pending { background: #f59e0b; }
+  &.onhold { background: #3b82f6; }
+  &.holiday { background: #8b5cf6; }
+}
+
+// Leave Balance
+.balance-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+.balance-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-left: 4px solid #3b82f6;
+  mat-icon { font-size: 24px; width: 24px; height: 24px; color: #3b82f6; }
+}
+.bal-info { display: flex; flex-direction: column; }
+.bal-value { font-size: 18px; font-weight: 700; line-height: 1.2; }
+.bal-value.unlimited { font-size: 24px; line-height: 1; }
+.bal-label { font-size: 11px; color: #6b7280; }
 
 // Days table
 .detail-card table { width: 100%; }

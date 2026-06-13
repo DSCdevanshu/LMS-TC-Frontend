@@ -15,4 +15,10 @@ export class MasterService extends BaseService {
   createLocation(payload: any): Observable<any> { return this.post('Master/locations', payload); }
   updateLocation(id: number, payload: any): Observable<any> { return this.put(`Master/locations/${id}`, payload); }
   deleteLocation(id: number): Observable<any> { return this.delete(`Master/locations/${id}`); }
+
+  // Holidays
+  getHolidays(): Observable<any> { return this.get('Master/holidays'); }
+  createHoliday(payload: any): Observable<any> { return this.post('Master/holidays', payload); }
+  updateHoliday(id: number, payload: any): Observable<any> { return this.put(`Master/holidays/${id}`, payload); }
+  deleteHoliday(id: number): Observable<any> { return this.delete(`Master/holidays/${id}`); }
 }

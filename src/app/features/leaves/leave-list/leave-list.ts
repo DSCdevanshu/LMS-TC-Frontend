@@ -17,6 +17,7 @@ import { LookupService, LookupFlags } from '../../../core/services/lookup.servic
 import { AuthService } from '../../../core/services/auth.service';
 import { LayoutService } from '../../../core/services/layout.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ExportService, ExportColumn } from '../../../core/services/export.service';
 import { RowActionsComponent } from '../../../shared/components/row-actions/row-actions';
 import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
 import { LeaveCodePipe } from '../../../core/pipes/leave-code.pipe';
@@ -43,6 +44,8 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
   private readonly auth = inject(AuthService);
   private readonly layout = inject(LayoutService);
   private readonly notification = inject(NotificationService);
+  private readonly exportService = inject(ExportService);
+  private readonly leaveCodePipe = new LeaveCodePipe();
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -176,6 +179,36 @@ export class LeaveListComponent implements OnInit, AfterViewInit {
     if (key === 'view') {
       void this.router.navigate(['/leaves', row.leaveReqID]);
     }
+  }
+
+  exportCsv(): void {
+    const rows = this.dataSource.filteredData;
+    if (!rows.length) {
+      this.notification.error('Nothing to Export', 'There are no leave requests to export.');
+      return;
+    }
+
+    const date = (v: any) => v ? new Date(v) : null;
+    const columns: ExportColumn<any>[] = [
+      { header: 'Leave Code', value: r => this.leaveCodePipe.transform(r.leaveReqID) },
+      ...(this.isMyLeaves ? [] : [
+        { header: 'Employee', value: (r: any) => r.employeeName },
+        { header: 'Emp Code', value: (r: any) => r.empCode },
+        { header: 'Department', value: (r: any) => r.departmentName }
+      ]),
+      { header: 'Leave Type', value: r => r.leaveTypeName },
+      { header: 'From', value: r => date(r.startDate) },
+      { header: 'To', value: r => date(r.endDate) },
+      { header: 'Days', value: r => r.totalDays },
+      { header: 'Status', value: r => r.currentStatusName },
+      ...(this.isMyLeaves ? [
+        { header: 'Requested', value: (r: any) => date(r.requestDate) }
+      ] : [])
+    ];
+
+    const stamp = this.iso(new Date());
+    const name = this.isMyLeaves ? `my-leaves_${stamp}` : `team-leaves_${stamp}`;
+    this.exportService.exportToCsv(name, rows, columns);
   }
 
   statusGroup(status: string): string {

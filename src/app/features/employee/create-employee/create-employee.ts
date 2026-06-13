@@ -11,7 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { MasterService } from '../../../core/services/master.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { NavHistoryService } from '../../../core/services/nav-history.service';
 import { DateInputMaskDirective } from '../../../core/directives/date-input-mask.directive';
@@ -30,6 +32,7 @@ import { DateInputMaskDirective } from '../../../core/directives/date-input-mask
     MatCardModule,
     MatDividerModule,
     MatProgressBarModule,
+    MatCheckboxModule,
     DateInputMaskDirective
   ],
   templateUrl: './create-employee.html',
@@ -39,6 +42,7 @@ import { DateInputMaskDirective } from '../../../core/directives/date-input-mask
 export class CreateEmployeeComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly employeeService = inject(EmployeeService);
+  private readonly masterService = inject(MasterService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly navHistory = inject(NavHistoryService);
@@ -49,6 +53,8 @@ export class CreateEmployeeComponent implements OnInit {
   readonly departments = signal<any[]>([]);
   readonly designations = signal<any[]>([]);
   readonly managers = signal<any[]>([]);
+  readonly companies = signal<any[]>([]);
+  readonly locations = signal<any[]>([]);
   readonly photoPreview = signal<string | null>(null);
   readonly selectedPhotoName = signal<string>('No file selected');
 
@@ -69,6 +75,9 @@ export class CreateEmployeeComponent implements OnInit {
     hireDate: [null as Date | null, Validators.required],
     designationId: [null as number | null, Validators.required],
     departmentId: [null as number | null, Validators.required],
+    companyId: [null as number | null, Validators.required],
+    locationId: [null as number | null, Validators.required],
+    canWorkFromHome: [false],
     reportingManagerIds: [[] as number[]],
     pan: [''],
     aadhaarCard: [''],
@@ -151,6 +160,9 @@ export class CreateEmployeeComponent implements OnInit {
         hireDate: value.hireDate instanceof Date ? this.formatDate(value.hireDate) : (value.hireDate ?? ''),
         designationId: value.designationId ?? 0,
         departmentId: value.departmentId ?? 0,
+        companyId: value.companyId ?? 0,
+        locationId: value.locationId ?? 0,
+        canWorkFromHome: value.canWorkFromHome ?? false,
         reportingManagerIds: value.reportingManagerIds ?? [],
         pan: value.pan,
         aadhaarCard: value.aadhaarCard,
@@ -165,6 +177,9 @@ export class CreateEmployeeComponent implements OnInit {
             reportingManagerIds: [],
             designationId: null,
             departmentId: null,
+            companyId: null,
+            locationId: null,
+            canWorkFromHome: false,
             photo: null
           });
           this.selectedPhotoName.set('No file selected');
@@ -194,12 +209,16 @@ export class CreateEmployeeComponent implements OnInit {
     forkJoin({
       departments: this.employeeService.getDropdownData('GetDepartmentDropdown'),
       designations: this.employeeService.getDropdownData('GetDesignationDropdown'),
-      managers: this.employeeService.getDropdownData('GetAllEmployeesDropDown')
+      managers: this.employeeService.getDropdownData('GetAllEmployeesDropDown'),
+      companies: this.masterService.getCompanies(),
+      locations: this.masterService.getLocations()
     }).subscribe({
-      next: ({ departments, designations, managers }) => {
+      next: ({ departments, designations, managers, companies, locations }) => {
         this.departments.set(departments.data ?? []);
         this.designations.set(designations.data ?? []);
         this.managers.set(managers.data ?? []);
+        this.companies.set(companies.data ?? []);
+        this.locations.set(locations.data ?? []);
       },
       error: (err) => {
         this.notification.error('Load Failed', err?.message || 'Unable to load dropdown values.');

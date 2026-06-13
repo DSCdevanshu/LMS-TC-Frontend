@@ -160,6 +160,26 @@
           <mat-error>Designation is required</mat-error>
         </mat-form-field>
 
+        <mat-form-field appearance="outline">
+          <mat-label>Company</mat-label>
+          <mat-select formControlName="companyId">
+            @for (c of companies(); track c.companyId) {
+              <mat-option [value]="c.companyId">{{ c.companyName }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Company is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <mat-select formControlName="locationId">
+            @for (l of locations(); track l.locationId) {
+              <mat-option [value]="l.locationId">{{ l.locationName }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Location is required</mat-error>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="full">
           <mat-label>Reporting Managers</mat-label>
           <mat-select formControlName="reportingManagerIds" multiple>
@@ -168,6 +188,8 @@
             }
           </mat-select>
         </mat-form-field>
+
+        <mat-checkbox formControlName="canWorkFromHome" class="full">Can Work From Home</mat-checkbox>
       </div>
 
       <mat-divider />

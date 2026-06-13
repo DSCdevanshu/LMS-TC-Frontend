@@ -4,9 +4,62 @@
       <h2>Holidays</h2>
       <p class="muted">Manage holiday calendar</p>
     </div>
+    <button mat-flat-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon> Add Holiday
+    </button>
   </div>
-  <div class="placeholder">
-    <mat-icon class="placeholder-icon">today</mat-icon>
-    <p>Holiday management coming soon.</p>
+
+  <div class="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Holiday Name</mat-label>
+      <input matInput (input)="applyFilter()" [(ngModel)]="filterName" placeholder="Filter by name..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Company</mat-label>
+      <input matInput (input)="applyFilter()" [(ngModel)]="filterCompany" placeholder="Filter by company..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource" matSort>
+      <ng-container matColumnDef="holidayName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Holiday Name</th>
+        <td mat-cell *matCellDef="let row">{{ row.holidayName }}</td>
+      </ng-container>
+      <ng-container matColumnDef="holidayDate">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+        <td mat-cell *matCellDef="let row">{{ row.holidayDate | date:'dd MMM yyyy' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="companyName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Company</th>
+        <td mat-cell *matCellDef="let row">{{ row.companyName || '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="locationName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Location</th>
+        <td mat-cell *matCellDef="let row">{{ row.locationName || '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="isRestricted">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-chip [highlighted]="row.isRestricted">{{ row.isRestricted ? 'Restricted' : 'General' }}</mat-chip>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <app-row-actions [actions]="rowActions" (actionClick)="onAction($event, row)"></app-row-actions>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      @if (dataSource.filteredData.length === 0) {
+        <tr class="empty"><td [attr.colspan]="displayedColumns.length">No holidays found</td></tr>
+      }
+    </table>
   </div>
 </div>

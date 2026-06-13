@@ -1,0 +1,244 @@
+<div class="feed-page">
+  <div class="feed-header">
+    <div>
+      <h2>Feed</h2>
+      <p class="muted">Share updates with everyone in the organisation</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon> New Post
+    </button>
+  </div>
+
+  <mat-button-toggle-group class="feed-tabs" [value]="view()" (change)="setView($event.value)" aria-label="Feed view">
+    <mat-button-toggle value="feed">
+      <mat-icon>dynamic_feed</mat-icon> Feed
+    </mat-button-toggle>
+    <mat-button-toggle value="drafts">
+      <mat-icon>edit_note</mat-icon> My Drafts
+    </mat-button-toggle>
+    <mat-button-toggle value="archived">
+      <mat-icon>archive</mat-icon> Archived
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-form-field appearance="outline" class="search">
+    <mat-label>Search posts</mat-label>
+    <input matInput [ngModel]="filterText()" (ngModelChange)="onFilter($event)" placeholder="Search by title, text or category..." />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  @if (view() === 'feed') {
+  @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="feed-list">
+    @for (post of visiblePosts(); track post.contentId) {
+      <article class="post-card">
+        <header class="post-head">
+          @if (post.authorPhoto) {
+            <img class="avatar-img" [src]="post.authorPhoto" [alt]="post.authorName || 'Author'" />
+          } @else {
+            <div class="avatar">{{ authorInitials(post) }}</div>
+          }
+          <div class="who">
+            <span class="name">{{ post.authorName || 'Team Member' }}</span>
+            <span class="meta">
+              {{ post.createdOn ? (post.createdOn | date:'dd MMM yyyy, h:mm a') : '' }}
+              @if (post.categoryName) { · {{ post.categoryName }} }
+            </span>
+          </div>
+          @if (post.isPinned) { <mat-icon class="pin" title="Pinned">push_pin</mat-icon> }
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="more" aria-label="Post actions">
+            <mat-icon>more_horiz</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="remove(post)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+        </header>
+
+        <div class="post-body">
+          @if (post.title) { <h3 class="post-title">{{ post.title }}</h3> }
+          @if (post.body) { <p class="post-text">{{ post.body }}</p> }
+        </div>
+
+        @if (post.images.length) {
+          <div class="post-media" [class.single]="post.images.length === 1" [class.multi]="post.images.length > 1">
+            @for (img of post.images; track img) {
+              <img [src]="img" alt="Post image" loading="lazy" />
+            }
+          </div>
+        }
+
+        @if (post.files.length) {
+          <div class="post-files">
+            @for (file of post.files; track file.fileUrl) {
+              <a class="file-chip" [href]="file.fileUrl" target="_blank" rel="noopener" [title]="file.fileName">
+                <mat-icon>description</mat-icon>
+                <span class="f-name">{{ file.fileName }}</span>
+                @if (fileSizeLabel(file.fileSizeBytes); as size) { <span class="f-size">{{ size }}</span> }
+              </a>
+            }
+          </div>
+        }
+
+        @if (post.likeCount > 0 || post.commentCount > 0) {
+          <div class="post-stats">
+            @if (post.likeCount > 0) {
+              <span class="stat"><mat-icon class="rx">thumb_up</mat-icon> {{ post.likeCount }}</span>
+            }
+            @if (post.commentCount > 0) {
+              <span class="stat clickable" (click)="toggleComments(post)">{{ post.commentCount }} comment{{ post.commentCount > 1 ? 's' : '' }}</span>
+            }
+          </div>
+        }
+
+        <div class="post-actions">
+          <button mat-button [class.active]="post.liked" (click)="toggleLike(post)">
+            <mat-icon>{{ post.liked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon> Like
+          </button>
+          <button mat-button (click)="toggleComments(post)">
+            <mat-icon>chat_bubble_outline</mat-icon> Comment
+          </button>
+          <button mat-button>
+            <mat-icon>share</mat-icon> Share
+          </button>
+        </div>
+
+        @if (post.showComments) {
+          <div class="post-comments">
+            @for (c of post.comments; track $index) {
+              <div class="comment">
+                <div class="c-avatar">{{ (c.author[0] || 'U').toUpperCase() }}</div>
+                @if (c.editing) {
+                  <div class="c-edit">
+                    <input
+                      [ngModel]="c.editText"
+                      (ngModelChange)="updateCommentDraft(post, c, $event)"
+                      (keyup.enter)="saveEditComment(post, c)"
+                      (keyup.escape)="cancelEditComment(post, c)"
+                      placeholder="Edit comment..." />
+                    <button mat-icon-button color="primary" (click)="saveEditComment(post, c)" [disabled]="!c.editText.trim()" title="Save">
+                      <mat-icon>check</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="cancelEditComment(post, c)" title="Cancel">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                } @else {
+                  <div class="c-bubble">
+                    <span class="c-author">{{ c.author }}</span>
+                    <span class="c-text">{{ c.text }}</span>
+                    <span class="c-time" [title]="(c.createdOn | date:'dd MMM yyyy, h:mm a') || ''">
+                      {{ commentTimeLabel(c) }} · {{ c.createdOn | date:'dd MMM yyyy, h:mm a' }}
+                    </span>
+                  </div>
+                  @if (c.canEdit) {
+                    <button mat-icon-button class="c-more" [matMenuTriggerFor]="cmenu" aria-label="Comment actions">
+                      <mat-icon>more_horiz</mat-icon>
+                    </button>
+                    <mat-menu #cmenu="matMenu">
+                      <button mat-menu-item (click)="startEditComment(post, c)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Edit</span>
+                      </button>
+                      <button mat-menu-item (click)="deleteComment(post, c)">
+                        <mat-icon color="warn">delete</mat-icon>
+                        <span>Delete</span>
+                      </button>
+                    </mat-menu>
+                  }
+                }
+              </div>
+            }
+            <div class="comment-input">
+              <div class="c-avatar">You</div>
+              <input
+                [ngModel]="post.newComment"
+                (ngModelChange)="updateDraft(post, $event)"
+                (keyup.enter)="addComment(post)"
+                placeholder="Add a comment..." />
+              <button mat-icon-button color="primary" (click)="addComment(post)" [disabled]="!post.newComment.trim()">
+                <mat-icon>send</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </article>
+    } @empty {
+      <div class="empty-feed">
+        <mat-icon>dynamic_feed</mat-icon>
+        <p>No posts yet. Be the first to share something.</p>
+      </div>
+    }
+
+    @if (loadingMore()) {
+      <div class="feed-loading-more">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    }
+
+    @if (!filterText() && hasMore()) {
+      <div #scrollSentinel class="scroll-sentinel" aria-hidden="true"></div>
+    }
+  </div>
+  } @else {
+  @if (managedLoading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="feed-list">
+    @for (item of visibleManaged(); track item.contentType + '-' + item.contentId) {
+      <article class="post-card">
+        <header class="post-head">
+          @if (item.authorPhoto) {
+            <img class="avatar-img" [src]="item.authorPhoto" [alt]="item.authorName || 'Author'" />
+          } @else {
+            <div class="avatar">{{ managedInitials(item) }}</div>
+          }
+          <div class="who">
+            <span class="name">{{ item.authorName || 'Team Member' }}</span>
+            <span class="meta">
+              {{ item.createdOn ? (item.createdOn | date:'dd MMM yyyy, h:mm a') : '' }}
+              @if (item.categoryName) { · {{ item.categoryName }} }
+            </span>
+          </div>
+          <span class="type-badge" [class.t-announcement]="item.contentType === 'Announcement'" [class.t-policy]="item.contentType === 'Policy'" [class.t-post]="item.contentType === 'Post'">
+            {{ item.contentType }}
+          </span>
+          @if (item.isPinned) { <mat-icon class="pin" title="Pinned">push_pin</mat-icon> }
+        </header>
+
+        <div class="post-body">
+          @if (item.title) { <h3 class="post-title">{{ item.title }}</h3> }
+          @if (item.body) { <p class="post-text">{{ item.body }}</p> }
+        </div>
+
+        @if (item.images.length) {
+          <div class="post-media" [class.single]="item.images.length === 1" [class.multi]="item.images.length > 1">
+            @for (img of item.images; track img) {
+              <img [src]="img" alt="Image" loading="lazy" />
+            }
+          </div>
+        }
+
+        @if (item.files.length) {
+          <div class="post-files">
+            @for (file of item.files; track file.fileUrl) {
+              <a class="file-chip" [href]="file.fileUrl" target="_blank" rel="noopener" [title]="file.fileName">
+                <mat-icon>description</mat-icon>
+                <span class="f-name">{{ file.fileName }}</span>
+                @if (fileSizeLabel(file.fileSizeBytes); as size) { <span class="f-size">{{ size }}</span> }
+              </a>
+            }
+          </div>
+        }
+      </article>
+    } @empty {
+      <div class="empty-feed">
+        <mat-icon>{{ view() === 'drafts' ? 'edit_note' : 'archive' }}</mat-icon>
+        <p>{{ view() === 'drafts' ? 'You have no draft content.' : 'No archived content.' }}</p>
+      </div>
+    }
+  </div>
+  }
+</div>

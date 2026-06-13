@@ -1,4 +1,141 @@
 <section class="dashboard-page">
-  <h1>Dashboard</h1>
-  <p>Your dashboard page is ready. Content modules can be added here.</p>
+  <!-- Greeting -->
+  <div class="welcome-card">
+    <div>
+      <h1>{{ greeting() }}, {{ displayName() }} 👋</h1>
+      <p class="muted">{{ today | date:'EEEE, dd MMMM yyyy' }}</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/leaves/apply">
+      <mat-icon>add</mat-icon> Apply Leave
+    </a>
+  </div>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="grid">
+    <!-- Birthdays -->
+    <div class="card">
+      <div class="card-head">
+        <h3><mat-icon class="ic ic-birthday">cake</mat-icon> Upcoming Birthdays</h3>
+      </div>
+      <div class="card-body">
+        @if (birthdays().length) {
+          @for (b of birthdays(); track b.userId) {
+            <div class="person-row">
+              @if (b.photoUrl) { <img [src]="b.photoUrl" class="avatar" alt=""/> }
+              @else { <div class="avatar avatar-initials">{{ initials(b.fullName) }}</div> }
+              <div class="person-info">
+                <span class="person-name">{{ b.fullName }}</span>
+                <span class="person-meta">{{ b.designationName }}@if (b.departmentName) { · {{ b.departmentName }}}</span>
+              </div>
+              <div class="person-when">
+                <span class="when-date">{{ b.upcomingDate | date:'dd MMM' }}</span>
+                <span class="when-rel" [class.is-today]="+b.daysUntil <= 0">{{ daysLabel(b.daysUntil) }}</span>
+              </div>
+            </div>
+          }
+        } @else {
+          <p class="empty">No upcoming birthdays</p>
+        }
+      </div>
+    </div>
+
+    <!-- Work Anniversaries -->
+    <div class="card">
+      <div class="card-head">
+        <h3><mat-icon class="ic ic-anniversary">workspace_premium</mat-icon> Work Anniversaries</h3>
+      </div>
+      <div class="card-body">
+        @if (anniversaries().length) {
+          @for (a of anniversaries(); track a.userId) {
+            <div class="person-row">
+              @if (a.photoUrl) { <img [src]="a.photoUrl" class="avatar" alt=""/> }
+              @else { <div class="avatar avatar-initials">{{ initials(a.fullName) }}</div> }
+              <div class="person-info">
+                <span class="person-name">{{ a.fullName }}</span>
+                <span class="person-meta">{{ a.designationName }}@if (a.departmentName) { · {{ a.departmentName }}}</span>
+              </div>
+              <div class="person-when">
+                @if (+a.years > 0) { <span class="years-badge">{{ a.years }} yr{{ +a.years > 1 ? 's' : '' }}</span> }
+                <span class="when-rel" [class.is-today]="+a.daysUntil <= 0">{{ daysLabel(a.daysUntil) }}</span>
+              </div>
+            </div>
+          }
+        } @else {
+          <p class="empty">No upcoming anniversaries</p>
+        }
+      </div>
+    </div>
+
+    <!-- Holidays -->
+    <div class="card">
+      <div class="card-head">
+        <h3><mat-icon class="ic ic-holiday">beach_access</mat-icon> Upcoming Holidays</h3>
+      </div>
+      <div class="card-body">
+        @if (holidays().length) {
+          @for (h of holidays(); track h.holidayId) {
+            <div class="holiday-row">
+              <div class="holiday-date">
+                <span class="hd-day">{{ h.holidayDate | date:'dd' }}</span>
+                <span class="hd-month">{{ h.holidayDate | date:'MMM' }}</span>
+              </div>
+              <div class="holiday-info">
+                <span class="holiday-name">{{ h.holidayName }}</span>
+                <span class="holiday-meta">
+                  {{ h.holidayDate | date:'EEEE' }}
+                  @if (h.locationName) { · {{ h.locationName }} }
+                </span>
+              </div>
+              @if (h.isRestricted) { <span class="tag tag-restricted">Restricted</span> }
+            </div>
+          }
+        } @else {
+          <p class="empty">No upcoming holidays</p>
+        }
+      </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="card">
+      <div class="card-head">
+        <h3><mat-icon class="ic ic-announce">campaign</mat-icon> Announcements</h3>
+      </div>
+      <div class="card-body">
+        @if (announcements().length) {
+          @for (an of announcements(); track $index) {
+            <div class="announce-row">
+              <span class="announce-title">{{ an.title || an.subject || an.heading }}</span>
+              <span class="announce-text">{{ an.message || an.body || an.description }}</span>
+              @if (an.date || an.createdDate) {
+                <span class="announce-date">{{ (an.date || an.createdDate) | date:'dd MMM yyyy' }}</span>
+              }
+            </div>
+          }
+        } @else {
+          <p class="empty">No announcements yet</p>
+        }
+      </div>
+    </div>
+
+    <!-- Policies -->
+    <div class="card">
+      <div class="card-head">
+        <h3><mat-icon class="ic ic-policy">policy</mat-icon> Policies</h3>
+      </div>
+      <div class="card-body">
+        @if (policies().length) {
+          @for (p of policies(); track $index) {
+            <a class="policy-row" [href]="p.url || p.link || p.fileUrl || '#'" target="_blank" rel="noopener">
+              <mat-icon>description</mat-icon>
+              <span class="policy-name">{{ p.title || p.name || p.policyName }}</span>
+              <mat-icon class="policy-go">open_in_new</mat-icon>
+            </a>
+          }
+        } @else {
+          <p class="empty">No policies available</p>
+        }
+      </div>
+    </div>
+  </div>
 </section>

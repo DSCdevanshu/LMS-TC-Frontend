@@ -143,29 +143,21 @@
       </mat-card>
 
       <!-- Leave Balance -->
-      @if (balance(); as bal) {
+      @if (balance()?.length) {
         <div class="balance-row">
-          <div class="balance-card paid">
-            <mat-icon>work_off</mat-icon>
-            <div class="bal-info">
-              <span class="bal-value">{{ bal.paidLeave ?? 0 }}</span>
-              <span class="bal-label">Paid Leave</span>
+          @for (bal of balance(); track bal.leaveTypeId) {
+            <div class="balance-card">
+              <mat-icon>event_available</mat-icon>
+              <div class="bal-info">
+                @if (bal.isUnlimited) {
+                  <span class="bal-value unlimited" title="Unlimited">∞</span>
+                } @else {
+                  <span class="bal-value">{{ bal.balance ?? 0 }}</span>
+                }
+                <span class="bal-label">{{ bal.leaveType }}</span>
+              </div>
             </div>
-          </div>
-          <div class="balance-card free">
-            <mat-icon>free_cancellation</mat-icon>
-            <div class="bal-info">
-              <span class="bal-value">{{ bal.freeLeave ?? 0 }}</span>
-              <span class="bal-label">Free Leave</span>
-            </div>
-          </div>
-          <div class="balance-card short">
-            <mat-icon>schedule</mat-icon>
-            <div class="bal-info">
-              <span class="bal-value">{{ bal.shortLeave ?? 0 }}</span>
-              <span class="bal-label">Short Leave</span>
-            </div>
-          </div>
+          }
         </div>
       }
     </div>

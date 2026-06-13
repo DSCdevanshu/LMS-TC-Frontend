@@ -94,7 +94,7 @@
 // Leave Balance
 .balance-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
 }
 
@@ -106,13 +106,15 @@
   border-radius: 10px;
   background: #fff;
   border: 1px solid #dbeafe;
+  border-left: 4px solid #3b82f6;
 
-  mat-icon { font-size: 24px; width: 24px; height: 24px; }
-  &.paid { border-left: 4px solid #3b82f6; mat-icon { color: #3b82f6; } }
-  &.free { border-left: 4px solid #16a34a; mat-icon { color: #16a34a; } }
-  &.short { border-left: 4px solid #f59e0b; mat-icon { color: #f59e0b; } }
+  mat-icon { font-size: 24px; width: 24px; height: 24px; color: #3b82f6; }
+  &.paid { border-left-color: #3b82f6; mat-icon { color: #3b82f6; } }
+  &.free { border-left-color: #16a34a; mat-icon { color: #16a34a; } }
+  &.short { border-left-color: #f59e0b; mat-icon { color: #f59e0b; } }
 }
 
 .bal-info { display: flex; flex-direction: column; }
 .bal-value { font-size: 18px; font-weight: 700; line-height: 1.2; }
+.bal-value.unlimited { font-size: 24px; line-height: 1; }
 .bal-label { font-size: 11px; color: #6b7280; }

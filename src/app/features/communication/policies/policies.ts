@@ -10,38 +10,38 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MasterService } from '../../../core/services/master.service';
+import { CommunicationService } from '../../../core/services/communication.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { HolidayDialogComponent } from './holiday-dialog';
+import { PolicyDialogComponent } from './policy-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { RowActionsComponent, RowAction } from '../../../shared/components/row-actions/row-actions';
 
 @Component({
-  selector: 'app-holidays',
+  selector: 'app-policies',
   imports: [
     FormsModule, DatePipe, MatTableModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatProgressBarModule, MatSortModule,
     MatChipsModule, MatDialogModule, RowActionsComponent
   ],
-  templateUrl: './holidays.html',
-  styleUrl: './holidays.scss',
+  templateUrl: './policies.html',
+  styleUrl: './policies.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HolidaysComponent implements OnInit, AfterViewInit {
-  private readonly service = inject(MasterService);
+export class PoliciesComponent implements OnInit, AfterViewInit {
+  private readonly service = inject(CommunicationService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(false);
-  readonly displayedColumns = ['holidayName', 'holidayDate', 'companyName', 'locationName', 'isRestricted', 'actions'];
+  readonly displayedColumns = ['title', 'categoryName', 'ownerDepartmentName', 'revisionNo', 'publishOn', 'acknowledged', 'actions'];
   readonly dataSource = new MatTableDataSource<any>([]);
   readonly rowActions: RowAction[] = [
-    { key: 'edit', label: 'Edit', icon: 'edit', color: 'blue' },
+    { key: 'acknowledge', label: 'Acknowledge', icon: 'task_alt', color: 'blue' },
     { key: 'delete', label: 'Delete', icon: 'delete', color: 'red' }
   ];
 
-  filterName = '';
-  filterCompany = '';
+  filterTitle = '';
+  filterCategory = '';
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -51,41 +51,49 @@ export class HolidaysComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
-    this.sort.active = 'holidayDate';
-    this.sort.direction = 'asc';
-    this.sort.sortChange.emit({ active: 'holidayDate', direction: 'asc' });
+    this.sort.active = 'publishOn';
+    this.sort.direction = 'desc';
+    this.sort.sortChange.emit({ active: 'publishOn', direction: 'desc' });
   }
 
   refresh(): void {
     this.loading.set(true);
-    this.service.getHolidays().subscribe({
-      next: (res) => { this.dataSource.data = res.data ?? []; this.applyFilter(); this.loading.set(false); },
-      error: (err) => { this.notification.error('Load Failed', err?.message || 'Could not load holidays.'); this.loading.set(false); }
+    this.service.getPolicies().subscribe({
+      next: (res) => { this.dataSource.data = res.data?.items ?? []; this.applyFilter(); this.loading.set(false); },
+      error: (err) => { this.notification.error('Load Failed', err?.message || 'Could not load policies.'); this.loading.set(false); }
     });
   }
 
   applyFilter(): void {
-    const name = this.filterName.toLowerCase().trim();
-    const company = this.filterCompany.toLowerCase().trim();
+    const title = this.filterTitle.toLowerCase().trim();
+    const category = this.filterCategory.toLowerCase().trim();
     this.dataSource.filterPredicate = (row: any) => {
-      const matchName = !name || (row.holidayName ?? '').toLowerCase().includes(name);
-      const matchCompany = !company || (row.companyName ?? '').toLowerCase().includes(company);
-      return matchName && matchCompany;
+      const matchTitle = !title || (row.title ?? '').toLowerCase().includes(title);
+      const matchCategory = !category || (row.categoryName ?? '').toLowerCase().includes(category);
+      return matchTitle && matchCategory;
     };
-    this.dataSource.filter = `${name}|${company}`;
+    this.dataSource.filter = `${title}|${category}`;
   }
 
   onAction(key: string, row: any): void {
     switch (key) {
-      case 'edit': this.openDialog(row); break;
+      case 'acknowledge': this.acknowledge(row); break;
       case 'delete': this.remove(row); break;
     }
   }
 
-  openDialog(row?: any): void {
-    const ref = this.dialog.open(HolidayDialogComponent, {
-      width: '520px',
-      data: { holiday: row ?? null }
+  acknowledge(row: any): void {
+    if (!row?.contentId) return;
+    this.service.acknowledgePolicy(row.contentId).subscribe({
+      next: (res) => { this.notification.success('Acknowledged', res?.message || 'Policy acknowledged.'); this.refresh(); },
+      error: (err) => this.notification.error('Failed', err?.message || 'Could not acknowledge policy.')
+    });
+  }
+
+  openDialog(): void {
+    const ref = this.dialog.open(PolicyDialogComponent, {
+      width: '600px',
+      data: { policy: null }
     });
     ref.afterClosed().subscribe(result => {
       if (result) this.refresh();
@@ -93,21 +101,21 @@ export class HolidaysComponent implements OnInit, AfterViewInit {
   }
 
   remove(row: any): void {
-    if (!row?.holidayId) return;
+    if (!row?.contentId) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Holiday',
-        message: `Are you sure you want to delete "${row.holidayName}"? This action cannot be undone.`,
+        title: 'Delete Policy',
+        message: `Are you sure you want to delete "${row.title}"? This action cannot be undone.`,
         confirmText: 'Delete',
         color: 'warn'
       }
     });
     ref.afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
-      this.service.deleteHoliday(row.holidayId).subscribe({
-        next: (res) => { this.notification.success('Deleted', res?.message || 'Holiday removed.'); this.refresh(); },
-        error: (err) => this.notification.error('Delete Failed', err?.error?.message || 'Could not delete holiday.')
+      this.service.deletePolicy(row.contentId).subscribe({
+        next: (res) => { this.notification.success('Deleted', res?.message || 'Policy removed.'); this.refresh(); },
+        error: (err) => this.notification.error('Delete Failed', err?.message || 'Could not delete policy.')
       });
     });
   }

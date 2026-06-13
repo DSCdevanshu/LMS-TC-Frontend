@@ -51,6 +51,14 @@
             <span class="value">{{ emp.lastName || '—' }}</span>
           </div>
           <div class="field">
+            <span class="label">Father's Name</span>
+            <span class="value">{{ emp.fathersName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Mother's Name</span>
+            <span class="value">{{ emp.mothersName || '—' }}</span>
+          </div>
+          <div class="field">
             <span class="label">Gender</span>
             <span class="value">{{ emp.gender || '—' }}</span>
           </div>
@@ -78,16 +86,32 @@
             <span class="value">{{ emp.empCode || '—' }}</span>
           </div>
           <div class="field">
+            <span class="label">Hire Date</span>
+            <span class="value">{{ emp.hireDate ? (emp.hireDate | date:'dd MMM yyyy') : '—' }}</span>
+          </div>
+          <div class="field">
             <span class="label">Department</span>
-            <span class="value">{{ departmentName() }}</span>
+            <span class="value">{{ emp.departmentName || '—' }}</span>
           </div>
           <div class="field">
             <span class="label">Designation</span>
-            <span class="value">{{ designationName() }}</span>
+            <span class="value">{{ emp.designationName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Company</span>
+            <span class="value">{{ emp.companyName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Location</span>
+            <span class="value">{{ emp.locationName || '—' }}</span>
+          </div>
+          <div class="field">
+            <span class="label">Can Work From Home</span>
+            <span class="value">{{ emp.canWorkFromHome ? 'Yes' : 'No' }}</span>
           </div>
           <div class="field">
             <span class="label">Reporting Manager(s)</span>
-            <span class="value">{{ managerNames() }}</span>
+            <span class="value">{{ emp.managerNames || '—' }}</span>
           </div>
         </div>
       </mat-card>
